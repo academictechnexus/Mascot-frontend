@@ -1,0 +1,21 @@
+#mascot-widget {
+  width: 300px;
+  border: 2px solid #333;
+  border-radius: 10px;
+  padding: 10px;
+  font-family: Arial, sans-serif;
+}
+#mascot {
+  width: 100px;
+  display: block;
+  margin: 0 auto;
+}
+#chat-box {
+  height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 5px;
+  margin: 10px 0;
+}
+.user { color: blue; }
+.bot { color: green; }
