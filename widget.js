@@ -2,7 +2,11 @@ const chatBox = document.getElementById("chat-box");
 const input = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
 const voiceBtn = document.getElementById("voice-btn");
+const mascotUpload = document.getElementById("mascot-upload");
 
+const BASE_URL = "https://mascot-mvp-production.up.railway.app";
+
+// Add chat messages to UI
 function addMessage(sender, text) {
   const p = document.createElement("p");
   p.className = sender;
@@ -10,22 +14,22 @@ function addMessage(sender, text) {
   chatBox.appendChild(p);
   chatBox.scrollTop = chatBox.scrollHeight;
 
-  // Speech output
+  // Speech output for bot
   if (sender === "bot") {
     const speech = new SpeechSynthesisUtterance(text);
     window.speechSynthesis.speak(speech);
   }
 }
 
+// Send message to backend
 async function sendMessage() {
   const text = input.value;
   if (!text) return;
   addMessage("user", text);
   input.value = "";
 
-  // Call backend (Railway)
   try {
-    const res = await fetch("https://mascot-mvp-production.up.railway.app", {
+    const res = await fetch(`${BASE_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: text })
@@ -57,4 +61,31 @@ if (recognition) {
   };
 } else {
   voiceBtn.disabled = true;
+}
+
+// Mascot image upload
+if (mascotUpload) {
+  mascotUpload.addEventListener("change", async () => {
+    const file = mascotUpload.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("mascot", file);
+
+    try {
+      const res = await fetch(`${BASE_URL}/mascot/upload`, {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        addMessage("bot", "Mascot image uploaded successfully!");
+        document.getElementById("mascot-img").src = data.url || "default-mascot.png";
+      } else {
+        addMessage("bot", "Mascot upload failed.");
+      }
+    } catch (e) {
+      addMessage("bot", "Error uploading mascot.");
+    }
+  });
 }
