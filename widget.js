@@ -25,7 +25,7 @@ async function sendMessage() {
 
   // Call backend (Railway)
   try {
-    const res = await fetch("https://your-railway-app.up.railway.app/chat", {
+    const res = await fetch("https://https://mascot-mvp-production.up.railway.app", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: text })
