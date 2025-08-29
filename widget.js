@@ -1,126 +1,76 @@
-const API_BASE_URL = "https://mascot.academictechnexus.com"; // backend API
+// widget.js
 
-// --- Elements ---
-const chatToggle = document.getElementById("chat-toggle");
-const chatWidget = document.getElementById("chat-widget");
-const closeChat = document.getElementById("close-chat");
-const chatBody = document.getElementById("chat-body");
-const chatInput = document.getElementById("chat-input");
-const sendBtn = document.getElementById("send-btn");
-const voiceBtn = document.getElementById("voice-btn");
+document.addEventListener("DOMContentLoaded", () => {
+  const widget = document.querySelector(".chat-widget");
+  const toggleButton = document.querySelector(".chat-toggle");
+  const mascot = document.querySelector(".mascot");
+  const chatBox = document.querySelector(".chat-box");
+  const input = document.querySelector(".chat-input input");
+  const sendButton = document.querySelector(".chat-input button");
 
-const mascot = document.getElementById("mascot");
-const uploadInput = document.getElementById("uploadMascot");
+  // Open/close widget
+  toggleButton.addEventListener("click", () => {
+    widget.classList.toggle("open");
 
-// --- Toggle widget ---
-chatToggle.addEventListener("click", () => {
-  chatWidget.style.display = "block";
-  chatToggle.style.display = "none";
-});
-closeChat.addEventListener("click", () => {
-  chatWidget.style.display = "none";
-  chatToggle.style.display = "block";
-});
-
-// --- Display messages ---
-function displayMessage(message, type) {
-  const msgDiv = document.createElement("div");
-  msgDiv.classList.add("message", type === "user" ? "user-message" : "bot-message");
-  msgDiv.innerText = message;
-  chatBody.appendChild(msgDiv);
-  chatBody.scrollTop = chatBody.scrollHeight;
-}
-
-// --- Typing indicator ---
-function showTyping() {
-  const typingDiv = document.createElement("div");
-  typingDiv.classList.add("message", "bot-message");
-  typingDiv.innerText = "🤖 Typing...";
-  typingDiv.id = "typing-indicator";
-  chatBody.appendChild(typingDiv);
-  chatBody.scrollTop = chatBody.scrollHeight;
-}
-function hideTyping() {
-  const typingDiv = document.getElementById("typing-indicator");
-  if (typingDiv) typingDiv.remove();
-}
-
-// --- Bot speaks (with mascot animation) ---
-function speak(text) {
-  if (!text) return;
-  mascot.classList.add("talking");
-
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-
-  utterance.onend = () => {
-    mascot.classList.remove("talking");
-  };
-
-  speechSynthesis.speak(utterance);
-}
-
-// --- Send message to backend ---
-async function sendMessage(userMessage) {
-  if (!userMessage.trim()) return;
-  displayMessage(userMessage, "user");
-  chatInput.value = "";
-
-  showTyping();
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: userMessage })
-    });
-
-    const data = await response.json();
-    hideTyping();
-
-    const botReply = data.reply || "⚠️ No response";
-    displayMessage(botReply, "bot");
-    speak(botReply);
-  } catch (error) {
-    console.error("Error:", error);
-    hideTyping();
-    displayMessage("⚠️ Server not responding.", "bot");
-  }
-}
-
-// --- Event listeners ---
-sendBtn.addEventListener("click", () => sendMessage(chatInput.value));
-chatInput.addEventListener("keypress", e => {
-  if (e.key === "Enter") sendMessage(chatInput.value);
-});
-
-// --- Voice input (speech-to-text) ---
-if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
-  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-  recognition.lang = "en-US";
-
-  voiceBtn.addEventListener("click", () => {
-    recognition.start();
+    if (widget.classList.contains("open")) {
+      mascot.classList.add("mascot-wave"); // mascot waves when widget opens
+      setTimeout(() => mascot.classList.remove("mascot-wave"), 1500);
+    } else {
+      mascot.classList.add("mascot-bounce"); // mascot bounces when closing
+      setTimeout(() => mascot.classList.remove("mascot-bounce"), 1500);
+    }
   });
 
-  recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-    chatInput.value = transcript;
-    sendMessage(transcript);
-  };
+  // Handle sending message
+  function sendMessage() {
+    const text = input.value.trim();
+    if (text === "") return;
 
-  recognition.onerror = (event) => {
-    console.error("Voice error:", event.error);
-  };
-} else {
-  voiceBtn.disabled = true;
-  console.warn("Speech recognition not supported in this browser.");
-}
+    addMessage("You", text);
+    input.value = "";
 
-// --- Upload Mascot Image ---
-uploadInput.addEventListener("change", (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    mascot.src = URL.createObjectURL(file);
+    // Fake bot response
+    setTimeout(() => {
+      addMessage("Mascot", getBotResponse(text));
+      mascot.classList.add("mascot-happy");
+      setTimeout(() => mascot.classList.remove("mascot-happy"), 1200);
+    }, 1000);
   }
+
+  // Add message to chat box
+  function addMessage(sender, text) {
+    const msg = document.createElement("div");
+    msg.className = "message";
+    msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  // Dummy bot response logic
+  function getBotResponse(userText) {
+    const lower = userText.toLowerCase();
+    if (lower.includes("hello") || lower.includes("hi")) {
+      return "Hi there! 👋 How can I help you today?";
+    } else if (lower.includes("help")) {
+      return "Sure! Tell me what you’re looking for, and I’ll guide you.";
+    } else if (lower.includes("bye")) {
+      return "Goodbye! 👋 Come back anytime.";
+    } else {
+      return "I’m still learning 🤖, but I’ll try my best to help!";
+    }
+  }
+
+  // Send on button click
+  sendButton.addEventListener("click", sendMessage);
+
+  // Send on Enter key
+  input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendMessage();
+  });
+
+  // Mascot hover interaction
+  mascot.addEventListener("mouseenter", () => {
+    mascot.classList.add("mascot-wave");
+    setTimeout(() => mascot.classList.remove("mascot-wave"), 1500);
+  });
 });
