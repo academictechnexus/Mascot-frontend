@@ -1,6 +1,6 @@
-const API_BASE_URL = "https://mascot.academictechnexus.com"; // your backend
+const API_BASE_URL = "https://mascot.academictechnexus.com"; // backend API
 
-// Elements
+// --- Elements ---
 const chatToggle = document.getElementById("chat-toggle");
 const chatWidget = document.getElementById("chat-widget");
 const closeChat = document.getElementById("close-chat");
@@ -9,7 +9,10 @@ const chatInput = document.getElementById("chat-input");
 const sendBtn = document.getElementById("send-btn");
 const voiceBtn = document.getElementById("voice-btn");
 
-// Toggle widget
+const mascot = document.getElementById("mascot");
+const uploadInput = document.getElementById("uploadMascot");
+
+// --- Toggle widget ---
 chatToggle.addEventListener("click", () => {
   chatWidget.style.display = "block";
   chatToggle.style.display = "none";
@@ -19,7 +22,7 @@ closeChat.addEventListener("click", () => {
   chatToggle.style.display = "block";
 });
 
-// Add messages
+// --- Display messages ---
 function displayMessage(message, type) {
   const msgDiv = document.createElement("div");
   msgDiv.classList.add("message", type === "user" ? "user-message" : "bot-message");
@@ -28,18 +31,42 @@ function displayMessage(message, type) {
   chatBody.scrollTop = chatBody.scrollHeight;
 }
 
-// Speak bot reply
+// --- Typing indicator ---
+function showTyping() {
+  const typingDiv = document.createElement("div");
+  typingDiv.classList.add("message", "bot-message");
+  typingDiv.innerText = "🤖 Typing...";
+  typingDiv.id = "typing-indicator";
+  chatBody.appendChild(typingDiv);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+function hideTyping() {
+  const typingDiv = document.getElementById("typing-indicator");
+  if (typingDiv) typingDiv.remove();
+}
+
+// --- Bot speaks (with mascot animation) ---
 function speak(text) {
+  if (!text) return;
+  mascot.classList.add("talking");
+
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = "en-US";
+
+  utterance.onend = () => {
+    mascot.classList.remove("talking");
+  };
+
   speechSynthesis.speak(utterance);
 }
 
-// Send message
+// --- Send message to backend ---
 async function sendMessage(userMessage) {
   if (!userMessage.trim()) return;
   displayMessage(userMessage, "user");
   chatInput.value = "";
+
+  showTyping();
 
   try {
     const response = await fetch(`${API_BASE_URL}/chat`, {
@@ -47,27 +74,34 @@ async function sendMessage(userMessage) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: userMessage })
     });
+
     const data = await response.json();
+    hideTyping();
+
     const botReply = data.reply || "⚠️ No response";
     displayMessage(botReply, "bot");
     speak(botReply);
   } catch (error) {
     console.error("Error:", error);
+    hideTyping();
     displayMessage("⚠️ Server not responding.", "bot");
   }
 }
 
-// Event listeners
+// --- Event listeners ---
 sendBtn.addEventListener("click", () => sendMessage(chatInput.value));
 chatInput.addEventListener("keypress", e => {
   if (e.key === "Enter") sendMessage(chatInput.value);
 });
 
-// Voice input
-voiceBtn.addEventListener("click", () => {
+// --- Voice input (speech-to-text) ---
+if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
   const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   recognition.lang = "en-US";
-  recognition.start();
+
+  voiceBtn.addEventListener("click", () => {
+    recognition.start();
+  });
 
   recognition.onresult = (event) => {
     const transcript = event.results[0][0].transcript;
@@ -78,47 +112,15 @@ voiceBtn.addEventListener("click", () => {
   recognition.onerror = (event) => {
     console.error("Voice error:", event.error);
   };
-});
-const mascot = document.getElementById("mascot");
-const talkBtn = document.getElementById("talkBtn");
-const uploadInput = document.getElementById("uploadMascot");
-
-// --- Voice recognition (listen to user) ---
-const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-recognition.lang = "en-US";
-recognition.interimResults = false;
-
-// --- Voice synthesis (mascot speaks) ---
-function speak(text) {
-  mascot.classList.add("talking");
-
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.onend = () => {
-    mascot.classList.remove("talking");
-  };
-  speechSynthesis.speak(utterance);
+} else {
+  voiceBtn.disabled = true;
+  console.warn("Speech recognition not supported in this browser.");
 }
 
-// --- When talk button is clicked ---
-talkBtn.addEventListener("click", () => {
-  recognition.start();
-});
-
-// --- Handle recognition result ---
-recognition.onresult = (event) => {
-  const userSpeech = event.results[0][0].transcript;
-  console.log("User said:", userSpeech);
-
-  // Here you can send to backend AI (if connected)
-  // For now, mascot just repeats:
-  speak("You said: " + userSpeech);
-};
-
-// --- Allow mascot image upload ---
+// --- Upload Mascot Image ---
 uploadInput.addEventListener("change", (event) => {
   const file = event.target.files[0];
   if (file) {
     mascot.src = URL.createObjectURL(file);
   }
 });
-
