@@ -1,40 +1,18 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>AI Chat Widget</title>
-  <link rel="stylesheet" href="widget.css">
+  <meta charset="utf-8" />
+  <title>Mascot Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/public/widget.css?v=3" />
 </head>
 <body>
-  <!-- Chat Toggle Button -->
-  <div id="chat-toggle">💬</div>
+  <!-- Your site content here -->
 
-  <!-- Chat Widget -->
-  <div id="chat-widget">
-    <div id="chat-header">
-      <span>🤖 Academic Technexus Assistant</span>
-      <button id="close-chat">✖</button>
-    </div>
-    <div id="chat-body"></div>
-    <div id="chat-input-area">
-      <input type="text" id="chat-input" placeholder="Type your message...">
-      <button id="voice-btn">🎤</button>
-      <button id="send-btn">➤</button>
-    </div>
-  </div>
-
-  <!-- Mascot Section -->
-  <div id="mascot-container">
-    <img id="mascot" src="default-mascot.png" alt="Mascot">
-  </div>
-
-  <!-- Controls for Mascot & Voice -->
-  <div id="controls">
-    <button id="talkBtn">🎤 Talk</button>
-    <input type="file" id="uploadMascot" accept="image/*">
-  </div>
-
-  <!-- Script -->
-  <script src="widget.js"></script>
+  <!-- Load the widget and force it to use your backend -->
+  <script
+    src="/public/widget.js?v=3"
+    data-api="https://mascot.academictechnexus.com"
+  ></script>
 </body>
 </html>
