@@ -1,158 +1,170 @@
-/* Floating Chat Toggle Button */
-#chat-toggle {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #007bff;
-  color: #fff;
-  border-radius: 50%;
-  padding: 15px;
-  cursor: pointer;
-  font-size: 20px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  transition: transform 0.2s ease, background 0.2s ease;
-  z-index: 1000;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Chat Widget</title>
+  <style>
+    /* --- Chat Toggle Button --- */
+    #chat-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #007bff;
+      color: #fff;
+      border-radius: 50%;
+      padding: 15px;
+      cursor: pointer;
+      font-size: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
 
-#chat-toggle:hover {
-  background: #0056b3;
-  transform: scale(1.1);
-}
+    /* --- Chat Widget --- */
+    #chat-widget {
+      display: none;
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 360px;
+      height: 500px;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      overflow: hidden;
+      font-family: "Segoe UI", Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
 
-/* Chat Widget */
-#chat-widget {
-  display: none;
-  position: fixed;
-  bottom: 80px;
-  right: 20px;
-  width: 350px;
-  height: 450px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-  overflow: hidden;
-  font-family: Arial, sans-serif;
-  animation: slideUp 0.3s ease;
-  z-index: 999;
-}
+    #chat-header {
+      background: #007bff;
+      color: #fff;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+    }
 
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
+    #chat-header button, #uploadMascot {
+      background: transparent;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
 
-/* Chat Header */
-#chat-header {
-  background: linear-gradient(135deg, #007bff, #0056b3);
-  color: #fff;
-  padding: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
+    #chat-body {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+    }
 
-/* Chat Body */
-#chat-body {
-  height: 340px;
-  padding: 12px;
-  overflow-y: auto;
-  background: #fafafa;
-  scroll-behavior: smooth;
-}
+    .message {
+      margin: 6px 0;
+      padding: 10px 14px;
+      border-radius: 15px;
+      max-width: 80%;
+      line-height: 1.4;
+      font-size: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
 
-.message {
-  margin: 8px 0;
-  padding: 10px 14px;
-  border-radius: 8px;
-  max-width: 80%;
-  word-wrap: break-word;
-  font-size: 14px;
-  line-height: 1.4;
-  animation: fadeIn 0.2s ease-in;
-}
+    .user-message {
+      background: #007bff;
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 5px;
+    }
 
-.user-message {
-  background: #dcf8c6;
-  align-self: flex-end;
-  margin-left: auto;
-  border-bottom-right-radius: 2px;
-}
+    .bot-message {
+      background: #eaeaea;
+      align-self: flex-start;
+      border-bottom-left-radius: 5px;
+    }
 
-.bot-message {
-  background: #f1f0f0;
-  margin-right: auto;
-  border-bottom-left-radius: 2px;
-}
+    #chat-input-area {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+      background: #fff;
+    }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+    #chat-input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      font-size: 14px;
+    }
 
-/* Chat Input */
-#chat-input-area {
-  display: flex;
-  padding: 8px;
-  border-top: 1px solid #ddd;
-  background: #fff;
-}
+    #voice-btn, #send-btn, #talkBtn {
+      margin-left: 5px;
+      border: none;
+      background: #007bff;
+      color: #fff;
+      border-radius: 50%;
+      padding: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: 0.2s;
+    }
 
-#chat-input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
+    #voice-btn:hover, #send-btn:hover, #talkBtn:hover {
+      background: #0056b3;
+    }
 
-#chat-input:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 4px rgba(0,123,255,0.4);
-}
+    /* --- Mascot --- */
+    #mascot-container {
+      position: fixed;
+      bottom: 80px;
+      right: 400px;
+      width: 120px;
+      height: 120px;
+      text-align: center;
+    }
 
-/* Buttons */
-#voice-btn, #send-btn {
-  margin-left: 5px;
-  border: none;
-  background: #007bff;
-  color: #fff;
-  border-radius: 6px;
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
-}
+    #mascot {
+      width: 100%;
+      height: auto;
+      transition: transform 0.2s ease-in-out;
+    }
 
-#voice-btn:hover, #send-btn:hover {
-  background: #0056b3;
-  transform: scale(1.05);
-}
+    #mascot.talking {
+      transform: scale(1.08) rotate(2deg);
+    }
+  </style>
+</head>
+<body>
+  <!-- Chat Toggle -->
+  <div id="chat-toggle">💬</div>
 
-/* Mascot */
-#mascot-container {
-  position: fixed;
-  bottom: 150px;
-  right: 400px;
-  z-index: 998;
-  animation: float 3s ease-in-out infinite;
-}
+  <!-- Chat Widget -->
+  <div id="chat-widget">
+    <div id="chat-header">
+      <span>🤖 Academic Technexus Assistant</span>
+      <div>
+        <input type="file" id="uploadMascot" accept="image/*" title="Upload Mascot">
+        <button id="close-chat">✖</button>
+      </div>
+    </div>
+    <div id="chat-body"></div>
+    <div id="chat-input-area">
+      <input type="text" id="chat-input" placeholder="Type your message...">
+      <button id="voice-btn">🎤</button>
+      <button id="talkBtn">🗣️</button>
+      <button id="send-btn">➤</button>
+    </div>
+  </div>
 
-#mascot {
-  width: 120px;
-  height: auto;
-  transition: transform 0.3s ease-in-out;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
-}
+  <!-- Mascot -->
+  <div id="mascot-container">
+    <img id="mascot" src="default-mascot.png" alt="Mascot">
+  </div>
 
-#mascot.talking {
-  transform: scale(1.05) rotate(2deg);
-}
-
-/* Floating effect for mascot */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
+  <script src="widget.js"></script>
+</body>
+</html>
