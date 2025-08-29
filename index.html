@@ -3,23 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mascot Assistant Demo</title>
+  <title>AI Widget</title>
   <link rel="stylesheet" href="widget.css" />
 </head>
 <body>
-  <div id="mascot-widget">
-    <img id="mascot" src="default-mascot.png" alt="Mascot" />
-    <div id="chat-box"></div>
-    <input type="text" id="user-input" placeholder="Ask me something..." />
-    <button id="send-btn">Send</button>
-    <button id="voice-btn">🎤</button>
+  <div id="chat-widget">
+    <div id="chat-header">💬 AI Assistant</div>
+    <div id="chat-messages"></div>
+    <div id="chat-typing" class="hidden">Assistant is typing...</div>
+    <div id="chat-input-container">
+      <input type="text" id="chat-input" placeholder="Type a message..." />
+      <button id="send-btn">Send</button>
+    </div>
   </div>
+
+  <script src="config.js"></script>
   <script src="widget.js"></script>
-  <!-- Mascot Image -->
-<img id="mascot-img" src="default-mascot.png" alt="Mascot" width="100" />
-
-<!-- Mascot Upload -->
-<input type="file" id="mascot-upload" accept="image/*" />
-
 </body>
 </html>
