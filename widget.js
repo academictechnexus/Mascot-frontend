@@ -79,3 +79,46 @@ voiceBtn.addEventListener("click", () => {
     console.error("Voice error:", event.error);
   };
 });
+const mascot = document.getElementById("mascot");
+const talkBtn = document.getElementById("talkBtn");
+const uploadInput = document.getElementById("uploadMascot");
+
+// --- Voice recognition (listen to user) ---
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+recognition.lang = "en-US";
+recognition.interimResults = false;
+
+// --- Voice synthesis (mascot speaks) ---
+function speak(text) {
+  mascot.classList.add("talking");
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.onend = () => {
+    mascot.classList.remove("talking");
+  };
+  speechSynthesis.speak(utterance);
+}
+
+// --- When talk button is clicked ---
+talkBtn.addEventListener("click", () => {
+  recognition.start();
+});
+
+// --- Handle recognition result ---
+recognition.onresult = (event) => {
+  const userSpeech = event.results[0][0].transcript;
+  console.log("User said:", userSpeech);
+
+  // Here you can send to backend AI (if connected)
+  // For now, mascot just repeats:
+  speak("You said: " + userSpeech);
+};
+
+// --- Allow mascot image upload ---
+uploadInput.addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    mascot.src = URL.createObjectURL(file);
+  }
+});
+
