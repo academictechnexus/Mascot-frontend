@@ -1,91 +1,81 @@
-const chatBox = document.getElementById("chat-box");
-const input = document.getElementById("user-input");
+const API_BASE_URL = "https://mascot.academictechnexus.com"; // your backend
+
+// Elements
+const chatToggle = document.getElementById("chat-toggle");
+const chatWidget = document.getElementById("chat-widget");
+const closeChat = document.getElementById("close-chat");
+const chatBody = document.getElementById("chat-body");
+const chatInput = document.getElementById("chat-input");
 const sendBtn = document.getElementById("send-btn");
 const voiceBtn = document.getElementById("voice-btn");
-const mascotUpload = document.getElementById("mascot-upload");
 
-const BASE_URL = "https://mascot-mvp-production.up.railway.app";
+// Toggle widget
+chatToggle.addEventListener("click", () => {
+  chatWidget.style.display = "block";
+  chatToggle.style.display = "none";
+});
+closeChat.addEventListener("click", () => {
+  chatWidget.style.display = "none";
+  chatToggle.style.display = "block";
+});
 
-// Add chat messages to UI
-function addMessage(sender, text) {
-  const p = document.createElement("p");
-  p.className = sender;
-  p.textContent = text;
-  chatBox.appendChild(p);
-  chatBox.scrollTop = chatBox.scrollHeight;
-
-  // Speech output for bot
-  if (sender === "bot") {
-    const speech = new SpeechSynthesisUtterance(text);
-    window.speechSynthesis.speak(speech);
-  }
+// Add messages
+function displayMessage(message, type) {
+  const msgDiv = document.createElement("div");
+  msgDiv.classList.add("message", type === "user" ? "user-message" : "bot-message");
+  msgDiv.innerText = message;
+  chatBody.appendChild(msgDiv);
+  chatBody.scrollTop = chatBody.scrollHeight;
 }
 
-// Send message to backend
-async function sendMessage() {
-  const text = input.value;
-  if (!text) return;
-  addMessage("user", text);
-  input.value = "";
+// Speak bot reply
+function speak(text) {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  speechSynthesis.speak(utterance);
+}
+
+// Send message
+async function sendMessage(userMessage) {
+  if (!userMessage.trim()) return;
+  displayMessage(userMessage, "user");
+  chatInput.value = "";
 
   try {
-    const res = await fetch(`${BASE_URL}/chat`, {
+    const response = await fetch(`${API_BASE_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text })
+      body: JSON.stringify({ message: userMessage })
     });
-    const data = await res.json();
-    addMessage("bot", data.reply || "Sorry, no reply.");
-  } catch (e) {
-    addMessage("bot", "Error connecting to backend.");
+    const data = await response.json();
+    const botReply = data.reply || "⚠️ No response";
+    displayMessage(botReply, "bot");
+    speak(botReply);
+  } catch (error) {
+    console.error("Error:", error);
+    displayMessage("⚠️ Server not responding.", "bot");
   }
 }
 
-sendBtn.addEventListener("click", sendMessage);
-input.addEventListener("keypress", e => {
-  if (e.key === "Enter") sendMessage();
+// Event listeners
+sendBtn.addEventListener("click", () => sendMessage(chatInput.value));
+chatInput.addEventListener("keypress", e => {
+  if (e.key === "Enter") sendMessage(chatInput.value);
 });
 
 // Voice input
-const recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-if (recognition) {
-  const recog = new recognition();
-  recog.lang = "en-US";
-  voiceBtn.addEventListener("click", () => {
-    recog.start();
-  });
-  recog.onresult = e => {
-    const transcript = e.results[0][0].transcript;
-    input.value = transcript;
-    sendMessage();
+voiceBtn.addEventListener("click", () => {
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = "en-US";
+  recognition.start();
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    chatInput.value = transcript;
+    sendMessage(transcript);
   };
-} else {
-  voiceBtn.disabled = true;
-}
 
-// Mascot image upload
-if (mascotUpload) {
-  mascotUpload.addEventListener("change", async () => {
-    const file = mascotUpload.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("mascot", file);
-
-    try {
-      const res = await fetch(`${BASE_URL}/mascot/upload`, {
-        method: "POST",
-        body: formData
-      });
-      const data = await res.json();
-      if (data.success) {
-        addMessage("bot", "Mascot image uploaded successfully!");
-        document.getElementById("mascot-img").src = data.url || "default-mascot.png";
-      } else {
-        addMessage("bot", "Mascot upload failed.");
-      }
-    } catch (e) {
-      addMessage("bot", "Error uploading mascot.");
-    }
-  });
-}
+  recognition.onerror = (event) => {
+    console.error("Voice error:", event.error);
+  };
+});
