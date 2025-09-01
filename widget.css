@@ -3,7 +3,7 @@ body {
   font-family: Arial, sans-serif;
 }
 
-/* Floating mascot bubble in bottom-right */
+/* Mascot bubble in bottom-right */
 #mascot-bubble {
   position: fixed;
   bottom: 20px;
@@ -27,18 +27,26 @@ body {
   border-radius: 50%;
 }
 
-/* When mascot is speaking, move it forward & dance */
+/* Speaking: move to center + dance */
 #mascot-bubble.speaking {
   bottom: 40%;
   right: 40%;
   transform: scale(1.5);
-  animation: dance 0.5s infinite alternate;
+  animation: dance 0.5s infinite alternate, pulse 1s infinite;
   z-index: 10000;
 }
 
+/* Wiggle dance */
 @keyframes dance {
   from { transform: scale(1.5) rotate(-10deg); }
   to   { transform: scale(1.5) rotate(10deg); }
+}
+
+/* Fallback bounce/pulse */
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.7); }
+  70% { box-shadow: 0 0 0 20px rgba(255, 209, 102, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0); }
 }
 
 /* Chat window */
@@ -121,6 +129,12 @@ body {
   margin: 8px 0;
   background: #fafafa;
   box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .product-title {
