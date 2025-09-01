@@ -7,14 +7,11 @@ const micBtn = document.getElementById("mic-btn");
 const chatInput = document.getElementById("chat-input");
 const closeBtn = document.getElementById("close-btn");
 const muteBtn = document.getElementById("mute-btn");
-const uploadBtn = document.getElementById("upload-btn");
-const uploadInput = document.getElementById("mascot-upload");
+const toggleModeBtn = document.getElementById("toggle-mode");
+const avatarContainer = document.getElementById("avatar-container");
 
 let isMuted = false;
-
-// Load mascot from localStorage if available
-const savedMascot = localStorage.getItem("mascotImg");
-if (savedMascot) mascotImg.src = savedMascot;
+let currentMode = "mascot"; // default mode
 
 // Toggle chat window
 mascotBubble.onclick = () => {
@@ -24,7 +21,7 @@ mascotBubble.onclick = () => {
 // Close chat
 closeBtn.onclick = () => chatWindow.classList.add("hidden");
 
-// ✅ Allow pressing Enter to send message
+// ✅ Press Enter to send
 chatInput.addEventListener("keypress", function(event) {
   if (event.key === "Enter") {
     event.preventDefault();
@@ -38,19 +35,29 @@ muteBtn.onclick = () => {
   muteBtn.innerText = isMuted ? "🔇" : "🔊";
 };
 
-// Upload mascot button
-uploadBtn.onclick = () => uploadInput.click();
+// Switch Mascot ↔ Avatar with fade
+toggleModeBtn.onclick = () => {
+  if (currentMode === "mascot") {
+    currentMode = "avatar";
+    toggleModeBtn.innerText = "Switch to Mascot";
 
-// When file is chosen
-uploadInput.onchange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-      mascotImg.src = ev.target.result;
-      localStorage.setItem("mascotImg", ev.target.result); // Save
-    };
-    reader.readAsDataURL(file);
+    mascotBubble.classList.add("hidden");
+    setTimeout(() => {
+      mascotBubble.style.display = "none";
+      avatarContainer.style.display = "block";
+      setTimeout(() => avatarContainer.classList.remove("hidden"), 50);
+    }, 500);
+
+  } else {
+    currentMode = "mascot";
+    toggleModeBtn.innerText = "Switch to Avatar";
+
+    avatarContainer.classList.add("hidden");
+    setTimeout(() => {
+      avatarContainer.style.display = "none";
+      mascotBubble.style.display = "flex";
+      setTimeout(() => mascotBubble.classList.remove("hidden"), 50);
+    }, 500);
   }
 };
 
@@ -61,8 +68,6 @@ sendBtn.onclick = async () => {
 
   appendMessage("user", text);
   chatInput.value = "";
-
-  // Show typing
   appendMessage("bot", "...", true);
 
   try {
@@ -77,24 +82,24 @@ sendBtn.onclick = async () => {
 
     if (data.text) {
       appendMessage("bot", data.text);
-      startMascotSpeaking(data.text);
+      if (currentMode === "mascot") startMascotSpeaking(data.text);
+      else startAvatarSpeaking(data.text);
     }
 
     if (data.products && Array.isArray(data.products)) {
-      data.products.forEach(p => {
-        showProduct(p.name, p.price);
-      });
+      data.products.forEach(p => showProduct(p.name, p.price));
     }
 
   } catch (error) {
     console.error("Chat error:", error);
     removeTyping();
-    appendMessage("bot", "⚠️ Backend not reachable. Please try again later.");
-    startMascotSpeaking("Backend not reachable right now.");
+    appendMessage("bot", "⚠️ Backend not reachable.");
+    if (currentMode === "mascot") startMascotSpeaking("Backend not reachable.");
+    else startAvatarSpeaking("Backend not reachable.");
   }
 };
 
-// Append message to chat
+// Append message
 function appendMessage(sender, text, isTyping = false) {
   const msg = document.createElement("div");
   msg.className = `message ${sender}`;
@@ -104,19 +109,17 @@ function appendMessage(sender, text, isTyping = false) {
   chatBody.scrollTop = chatBody.scrollHeight;
 }
 
-// Remove typing indicator
 function removeTyping() {
   const typing = document.getElementById("typing");
   if (typing) typing.remove();
 }
 
-// Show product card
 function showProduct(name, price) {
   const card = document.createElement("div");
   card.className = "product-card";
   card.innerHTML = `
     <div class="product-title">${name}</div>
-    <div class="product-price">⭐️⭐️⭐️⭐️☆  ${price}</div>
+    <div class="product-price">⭐️⭐️⭐️⭐️☆ ${price}</div>
     <div class="product-actions">
       <button class="add-cart">Add to Cart</button>
       <button class="view-btn">View</button>
@@ -126,44 +129,77 @@ function showProduct(name, price) {
   chatBody.scrollTop = chatBody.scrollHeight;
 }
 
-// Mascot speaking animation + voice
+//
+// 🔹 Mascot Speaking
+//
 function startMascotSpeaking(text) {
   mascotBubble.classList.add("speaking");
 
   if (!isMuted) {
     const utterance = new SpeechSynthesisUtterance(text);
+    utterance.onend = () => mascotBubble.classList.remove("speaking");
     speechSynthesis.speak(utterance);
-    utterance.onend = () => {
-      mascotBubble.classList.remove("speaking"); // back to corner
-    };
   } else {
     setTimeout(() => mascotBubble.classList.remove("speaking"), 2000);
   }
 }
 
-// 🎤 Voice input (Speech-to-Text)
-if ("webkitSpeechRecognition" in window) {
-  const recognition = new webkitSpeechRecognition();
-  recognition.lang = "en-US";
-  recognition.continuous = false;
-  recognition.interimResults = false;
+//
+// 🔹 Avatar Speaking (ReadyPlayerMe)
+//
+let scene, camera, renderer, avatar, mixer, clock;
+clock = new THREE.Clock();
 
-  recognition.onresult = function(event) {
-    const transcript = event.results[0][0].transcript;
-    chatInput.value = transcript;
-  };
+function initAvatar(url) {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(
+    45,
+    avatarContainer.clientWidth / avatarContainer.clientHeight,
+    0.1,
+    1000
+  );
+  camera.position.z = 2;
 
-  recognition.onerror = function() {
-    alert("Voice recognition failed. Try again.");
-  };
+  renderer = new THREE.WebGLRenderer({ alpha: true });
+  renderer.setSize(avatarContainer.clientWidth, avatarContainer.clientHeight);
+  avatarContainer.appendChild(renderer.domElement);
 
-  micBtn.onclick = () => {
-    recognition.start();
-    micBtn.innerText = "🎙️"; // recording mode
-    recognition.onend = () => {
-      micBtn.innerText = "🎤"; // reset icon
-    };
+  const light = new THREE.HemisphereLight(0xffffff, 0x444444);
+  light.position.set(0, 20, 0);
+  scene.add(light);
+
+  const loader = new THREE.GLTFLoader();
+  loader.load(url, function (gltf) {
+    avatar = gltf.scene;
+    avatar.scale.set(1.5, 1.5, 1.5);
+    scene.add(avatar);
+
+    if (gltf.animations.length) {
+      mixer = new THREE.AnimationMixer(avatar);
+      mixer.clipAction(gltf.animations[0]).play();
+    }
+  });
+
+  animate();
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  const delta = clock.getDelta();
+  if (mixer) mixer.update(delta);
+  if (renderer) renderer.render(scene, camera);
+}
+
+// 👇 Load your avatar
+initAvatar("https://models.readyplayer.me/68b5e67fbac430a52ce1260e.glb");
+
+function startAvatarSpeaking(text) {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.onboundary = () => {
+    if (avatar) avatar.rotation.y = Math.sin(Date.now() * 0.01) * 0.3;
   };
-} else {
-  micBtn.onclick = () => alert("Your browser does not support voice input.");
+  utterance.onend = () => {
+    if (avatar) avatar.rotation.y = 0;
+  };
+  speechSynthesis.speak(utterance);
 }
