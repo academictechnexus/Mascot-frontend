@@ -50,6 +50,7 @@ body {
   color: white;
   padding: 10px;
   font-size: 16px;
+  font-weight: bold;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -127,7 +128,7 @@ body {
   border: 1px solid #ccc;
 }
 
-#send-btn {
+#send-btn, #mic-btn {
   margin-left: 6px;
   background: #073b4c;
   color: white;
@@ -135,6 +136,10 @@ body {
   border: none;
   border-radius: 10px;
   cursor: pointer;
+}
+
+#mic-btn {
+  background: #ef476f; /* red mic button */
 }
 
 /* Mascot animations */
