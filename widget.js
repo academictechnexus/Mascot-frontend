@@ -3,6 +3,7 @@ const mascotImg = document.getElementById("mascot-img");
 const chatWindow = document.getElementById("chat-window");
 const chatBody = document.getElementById("chat-body");
 const sendBtn = document.getElementById("send-btn");
+const micBtn = document.getElementById("mic-btn");
 const chatInput = document.getElementById("chat-input");
 const closeBtn = document.getElementById("close-btn");
 const muteBtn = document.getElementById("mute-btn");
@@ -56,19 +57,32 @@ sendBtn.onclick = async () => {
   // Show typing
   appendMessage("bot", "...", true);
 
-  // Simulate API call (replace with your backend later)
-  setTimeout(() => {
+  try {
+    // ✅ Replace with your backend endpoint (Railway)
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text }),
+    });
+
+    const data = await res.json();
+    const reply = data.text || "Sorry, I couldn't get a reply.";
+
     removeTyping();
-    const reply = "Here are some sample products for you:";
     appendMessage("bot", reply);
 
-    // Show product cards
+    // Example products (replace with Shopify API later)
     showProduct("AirMax 2024", "$49.99");
     showProduct("Sneaker Pro", "$39.99");
 
-    // Trigger mascot animation + voice
     startMascotSpeaking(reply);
-  }, 1200);
+
+  } catch (error) {
+    removeTyping();
+    appendMessage("bot", "⚠️ Backend not connected. Showing demo response.");
+    showProduct("Demo Shoe", "$00.00");
+    startMascotSpeaking("This is a demo reply while backend is offline.");
+  }
 };
 
 // Append message to chat
@@ -116,4 +130,31 @@ function startMascotSpeaking(text) {
   } else {
     setTimeout(() => mascotBubble.classList.remove("speaking"), 2000);
   }
+}
+
+// 🎤 Voice input (Speech-to-Text)
+if ("webkitSpeechRecognition" in window) {
+  const recognition = new webkitSpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onresult = function(event) {
+    const transcript = event.results[0][0].transcript;
+    chatInput.value = transcript;
+  };
+
+  recognition.onerror = function() {
+    alert("Voice recognition failed. Try again.");
+  };
+
+  micBtn.onclick = () => {
+    recognition.start();
+    micBtn.innerText = "🎙️"; // recording mode
+    recognition.onend = () => {
+      micBtn.innerText = "🎤"; // reset icon
+    };
+  };
+} else {
+  micBtn.onclick = () => alert("Your browser does not support voice input.");
 }
