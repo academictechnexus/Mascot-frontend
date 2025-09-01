@@ -6,6 +6,7 @@ const sendBtn = document.getElementById("send-btn");
 const micBtn = document.getElementById("mic-btn");
 const chatInput = document.getElementById("chat-input");
 const closeBtn = document.getElementById("close-btn");
+const minimizeBtn = document.getElementById("minimize-btn");
 const muteBtn = document.getElementById("mute-btn");
 const toggleModeBtn = document.getElementById("toggle-mode");
 const avatarContainer = document.getElementById("avatar-container");
@@ -13,37 +14,44 @@ const uploadBtn = document.getElementById("upload-btn");
 const uploadInput = document.getElementById("mascot-upload");
 
 let isMuted = false;
-let currentMode = "mascot"; // default
+let currentMode = "mascot";
 
-// Toggle chat window
+// Toggle chat
 mascotBubble.onclick = () => {
   chatWindow.classList.toggle("hidden");
 };
 
 // Close chat
-closeBtn.onclick = () => chatWindow.classList.add("hidden");
+closeBtn.onclick = () => {
+  chatWindow.classList.add("hidden");
+};
 
-// ✅ Press Enter to send
-chatInput.addEventListener("keypress", function(event) {
+// Minimize chat
+minimizeBtn.onclick = () => {
+  chatWindow.classList.toggle("minimized");
+};
+
+// Enter to send
+chatInput.addEventListener("keypress", (event) => {
   if (event.key === "Enter") {
     event.preventDefault();
     sendBtn.click();
   }
 });
 
-// Mute/unmute
+// Mute
 muteBtn.onclick = () => {
   isMuted = !isMuted;
   muteBtn.innerText = isMuted ? "🔇" : "🔊";
 };
 
-// Upload Mascot
+// Upload mascot
 uploadBtn.onclick = () => uploadInput.click();
 uploadInput.onchange = (e) => {
   const file = e.target.files[0];
   if (file) {
     const reader = new FileReader();
-    reader.onload = function(ev) {
+    reader.onload = (ev) => {
       mascotImg.src = ev.target.result;
       localStorage.setItem("mascotImg", ev.target.result);
     };
@@ -61,7 +69,8 @@ toggleModeBtn.onclick = () => {
     avatarContainer.classList.remove("hidden");
     avatarContainer.classList.add("show");
 
-    uploadBtn.disabled = true; // disable mascot upload
+    uploadBtn.disabled = true;
+    resizeRenderer();
 
   } else {
     currentMode = "mascot";
@@ -71,7 +80,7 @@ toggleModeBtn.onclick = () => {
     avatarContainer.classList.remove("show");
     mascotBubble.classList.remove("hidden");
 
-    uploadBtn.disabled = false; // enable mascot upload
+    uploadBtn.disabled = false;
   }
 };
 
@@ -99,14 +108,14 @@ sendBtn.onclick = async () => {
       if (currentMode === "mascot") startMascotSpeaking(data.text);
       else startAvatarSpeaking(data.text);
     }
-  } catch (error) {
-    console.error("Chat error:", error);
+  } catch (err) {
+    console.error("Chat error:", err);
     removeTyping();
     appendMessage("bot", "⚠️ Backend not reachable.");
   }
 };
 
-// Append + remove typing
+// Helpers
 function appendMessage(sender, text, isTyping = false) {
   const msg = document.createElement("div");
   msg.className = `message ${sender}`;
@@ -132,7 +141,7 @@ function startMascotSpeaking(text) {
   }
 }
 
-// Avatar speaking
+// Avatar (Three.js)
 let scene, camera, renderer, avatar, mixer, clock;
 clock = new THREE.Clock();
 
@@ -147,6 +156,7 @@ function initAvatar(url) {
   camera.position.z = 2;
 
   renderer = new THREE.WebGLRenderer({ alpha: true });
+  renderer.setClearColor(0x000000, 0); // transparent background
   renderer.setSize(avatarContainer.clientWidth, avatarContainer.clientHeight);
   avatarContainer.appendChild(renderer.domElement);
 
@@ -155,7 +165,7 @@ function initAvatar(url) {
   scene.add(light);
 
   const loader = new THREE.GLTFLoader();
-  loader.load(url, function (gltf) {
+  loader.load(url, (gltf) => {
     avatar = gltf.scene;
     avatar.scale.set(1.5, 1.5, 1.5);
     scene.add(avatar);
@@ -174,6 +184,14 @@ function animate() {
   const delta = clock.getDelta();
   if (mixer) mixer.update(delta);
   if (renderer) renderer.render(scene, camera);
+}
+
+function resizeRenderer() {
+  if (renderer && avatarContainer.clientWidth > 0) {
+    renderer.setSize(avatarContainer.clientWidth, avatarContainer.clientHeight);
+    camera.aspect = avatarContainer.clientWidth / avatarContainer.clientHeight;
+    camera.updateProjectionMatrix();
+  }
 }
 
 // Load ReadyPlayerMe avatar
