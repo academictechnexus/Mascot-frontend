@@ -8,18 +8,18 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.156.1/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
-  <!-- Mascot bubble -->
+  <!-- Floating Mascot Bubble -->
   <div id="mascot-bubble" class="fade">
     <img id="mascot-img" src="/mascot_idle.png" alt="Mascot">
   </div>
 
-  <!-- Chat window -->
+  <!-- Chat Window -->
   <div id="chat-window" class="hidden">
     <div id="chat-header">
-      <span>Shop Assistant</span>
-      <div>
-        <button id="toggle-mode">Switch to Avatar</button>
-        <button id="upload-btn">Upload Mascot</button>
+      <span class="chat-title">Shop Assistant</span>
+      <div class="chat-controls">
+        <button id="toggle-mode">Avatar</button>
+        <button id="upload-btn">Mascot</button>
         <input type="file" id="mascot-upload" accept="image/*" style="display:none;">
         <button id="minimize-btn">➖</button>
         <button id="close-btn">✖</button>
@@ -28,15 +28,15 @@
     <div id="chat-body"></div>
     <div id="chat-input-area">
       <input id="chat-input" placeholder="Type your message..."/>
-      <button id="send-btn">Send</button>
+      <button id="send-btn">➤</button>
       <button id="mic-btn">🎤</button>
       <button id="mute-btn">🔊</button>
     </div>
   </div>
 
-  <!-- Avatar container -->
-  <div id="avatar-container" class="fade hidden avatar-slide"
-       style="width:300px; height:400px; position:fixed; bottom:120px; right:20px; z-index:9999; pointer-events:none;">
+  <!-- Avatar Container -->
+  <div id="avatar-container" class="fade hidden avatar-slide">
+    <div id="avatar-loader">Loading Avatar...</div>
   </div>
 
   <script src="widget.js"></script>
