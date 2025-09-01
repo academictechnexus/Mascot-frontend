@@ -17,39 +17,28 @@ body {
   justify-content: center;
   cursor: pointer;
   box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
-  z-index: 9999;
+  z-index: 1000;
   transition: transform 0.5s ease, bottom 0.5s ease, right 0.5s ease;
 }
-
 #mascot-bubble img {
   width: 70px;
   height: 70px;
   border-radius: 50%;
 }
-
-/* Mascot speaking animation */
 #mascot-bubble.speaking {
   bottom: 40%;
   right: 40%;
   transform: scale(1.5);
-  animation: walkIn 0.8s ease-out forwards, dance 0.5s infinite alternate 0.8s, pulse 1s infinite 0.8s;
-  z-index: 10000;
+  animation: walkIn 0.8s ease-out forwards, dance 0.5s infinite alternate 0.8s;
+  z-index: 1001;
 }
-
 @keyframes walkIn {
-  0% { bottom: 20px; right: 20px; transform: scale(1); }
-  100% { bottom: 40%; right: 40%; transform: scale(1.5); }
+  from { bottom: 20px; right: 20px; transform: scale(1); }
+  to { bottom: 40%; right: 40%; transform: scale(1.5); }
 }
-
 @keyframes dance {
-  from { transform: scale(1.5) rotate(-10deg); }
-  to   { transform: scale(1.5) rotate(10deg); }
-}
-
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.7); }
-  70% { box-shadow: 0 0 0 20px rgba(255, 209, 102, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0); }
+  from { transform: scale(1.5) rotate(-8deg); }
+  to   { transform: scale(1.5) rotate(8deg); }
 }
 
 /* Fade effect */
@@ -57,7 +46,6 @@ body {
   opacity: 1;
   transition: opacity 0.5s ease-in-out;
 }
-
 .fade.hidden {
   opacity: 0;
   pointer-events: none;
@@ -65,12 +53,29 @@ body {
 
 /* Avatar slide in */
 .avatar-slide {
-  transform: translateX(100%);
+  width: 300px;
+  height: 400px;
+  position: fixed;
+  bottom: 120px;
+  right: 20px;
+  z-index: 999;
+  transform: translateX(120%);
   transition: transform 0.8s ease, opacity 0.5s ease-in-out;
 }
 .avatar-slide.show {
   transform: translateX(0);
   opacity: 1;
+}
+#avatar-loader {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #118ab2;
+  font-weight: bold;
+  font-size: 14px;
 }
 
 /* Chat window */
@@ -85,24 +90,31 @@ body {
   box-shadow: 0px 8px 24px rgba(0,0,0,0.3);
   display: flex;
   flex-direction: column;
-  z-index: 9998;
+  z-index: 1002;
 }
-
+#chat-window.hidden {
+  display: none;
+}
 #chat-window.minimized {
   height: 40px;
   overflow: hidden;
 }
 
+/* Header */
 #chat-header {
   display: flex;
   justify-content: space-between;
-  padding: 10px;
+  align-items: center;
+  padding: 8px;
   background: #073b4c;
   color: white;
   border-radius: 20px 20px 0 0;
 }
-
-#chat-header button {
+.chat-title {
+  font-size: 16px;
+  font-weight: bold;
+}
+.chat-controls button {
   margin-left: 4px;
   background: #06d6a0;
   color: white;
@@ -112,45 +124,42 @@ body {
   padding: 4px 8px;
 }
 
+/* Chat body */
 #chat-body {
   flex: 1;
   padding: 10px;
   overflow-y: auto;
 }
-
 .message {
   margin: 6px 0;
   padding: 8px 12px;
   border-radius: 12px;
   max-width: 75%;
 }
-
 .message.user {
   background: #118ab2;
   color: white;
   margin-left: auto;
 }
-
 .message.bot {
   background: #efefef;
   color: #333;
   margin-right: auto;
 }
 
+/* Input area */
 #chat-input-area {
   display: flex;
   padding: 10px;
   background: #f8f9fa;
 }
-
 #chat-input {
   flex: 1;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 10px;
 }
-
-#send-btn, #mic-btn, #mute-btn, #toggle-mode, #upload-btn, #close-btn, #minimize-btn {
+#send-btn, #mic-btn, #mute-btn {
   margin-left: 6px;
   background: #06d6a0;
   color: white;
