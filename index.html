@@ -19,6 +19,8 @@
       <span>Shop Assistant</span>
       <div>
         <button id="toggle-mode">Switch to Avatar</button>
+        <button id="upload-btn">Upload Mascot</button>
+        <input type="file" id="mascot-upload" accept="image/*" style="display:none;">
         <button id="close-btn">✖</button>
       </div>
     </div>
@@ -32,8 +34,9 @@
   </div>
 
   <!-- Avatar container -->
-  <div id="avatar-container" class="fade" 
-       style="width:300px; height:400px; position:fixed; bottom:120px; right:20px; z-index:9999; display:none;"></div>
+  <div id="avatar-container" class="fade hidden avatar-slide"
+       style="width:300px; height:400px; position:fixed; bottom:120px; right:20px; z-index:9999; pointer-events:none;">
+  </div>
 
   <script src="widget.js"></script>
 </body>
