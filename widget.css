@@ -3,13 +3,13 @@ body {
   font-family: Arial, sans-serif;
 }
 
-/* Floating mascot bubble */
+/* Floating mascot bubble in bottom-right */
 #mascot-bubble {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 70px;
-  height: 70px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background: #ffd166;
   display: flex;
@@ -17,14 +17,28 @@ body {
   justify-content: center;
   cursor: pointer;
   box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
-  animation: bounce 2s infinite;
   z-index: 9999;
+  transition: transform 0.5s ease, bottom 0.5s ease, right 0.5s ease;
 }
 
 #mascot-bubble img {
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
+}
+
+/* When mascot is speaking, move it forward & dance */
+#mascot-bubble.speaking {
+  bottom: 40%;
+  right: 40%;
+  transform: scale(1.5);
+  animation: dance 0.5s infinite alternate;
+  z-index: 10000;
+}
+
+@keyframes dance {
+  from { transform: scale(1.5) rotate(-10deg); }
+  to   { transform: scale(1.5) rotate(10deg); }
 }
 
 /* Chat window */
@@ -39,98 +53,59 @@ body {
   box-shadow: 0px 8px 24px rgba(0,0,0,0.3);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   z-index: 9998;
 }
 
-.hidden { display: none; }
-
 #chat-header {
-  background: #073b4c;
-  color: white;
-  padding: 10px;
-  font-size: 16px;
-  font-weight: bold;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-}
-
-#chat-header button {
-  background: none;
-  border: none;
+  padding: 10px;
+  background: #073b4c;
   color: white;
-  font-size: 16px;
-  margin-left: 6px;
-  cursor: pointer;
+  border-radius: 20px 20px 0 0;
 }
 
 #chat-body {
   flex: 1;
   padding: 10px;
   overflow-y: auto;
-  background: #f9f9f9;
 }
 
 .message {
-  margin: 5px 0;
+  margin: 6px 0;
   padding: 8px 12px;
   border-radius: 12px;
-  max-width: 80%;
+  max-width: 75%;
 }
 
-.user {
+.message.user {
   background: #118ab2;
   color: white;
   margin-left: auto;
 }
 
-.bot {
-  background: #eeeeee;
-  color: black;
+.message.bot {
+  background: #efefef;
+  color: #333;
   margin-right: auto;
 }
 
-/* Quick reply buttons */
-#quick-replies {
-  display: flex;
-  justify-content: space-around;
-  padding: 8px;
-  background: #fafafa;
-}
-
-.quick-btn {
-  flex: 1;
-  margin: 0 3px;
-  padding: 6px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  color: white;
-  font-size: 12px;
-}
-
-.quick-btn:nth-child(1) { background: #ef476f; }
-.quick-btn:nth-child(2) { background: #06d6a0; }
-.quick-btn:nth-child(3) { background: #118ab2; }
-
-/* Input area */
 #chat-input-area {
   display: flex;
   padding: 10px;
-  border-top: 1px solid #ddd;
+  background: #f8f9fa;
 }
 
 #chat-input {
   flex: 1;
   padding: 8px;
+  border: 1px solid #ddd;
   border-radius: 10px;
-  border: 1px solid #ccc;
 }
 
-#send-btn, #mic-btn {
+#send-btn, #mic-btn, #mute-btn, #upload-btn, #close-btn {
   margin-left: 6px;
-  background: #073b4c;
+  background: #06d6a0;
   color: white;
   padding: 8px 12px;
   border: none;
@@ -138,51 +113,31 @@ body {
   cursor: pointer;
 }
 
-#mic-btn {
-  background: #ef476f; /* red mic button */
-}
-
-/* Mascot animations */
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-.speaking {
-  animation: dance 0.5s infinite;
-}
-
-@keyframes dance {
-  0% { transform: rotate(-5deg) scale(1.05); }
-  50% { transform: rotate(5deg) scale(1.1); }
-  100% { transform: rotate(-5deg) scale(1.05); }
-}
-
-/* Product card */
+/* Product cards */
 .product-card {
-  background: #fff;
+  border: 1px solid #ddd;
   border-radius: 12px;
-  box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
   padding: 10px;
   margin: 8px 0;
+  background: #fafafa;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
 }
 
 .product-title {
   font-weight: bold;
 }
 
-.product-actions {
-  margin-top: 6px;
+.product-price {
+  color: #06d6a0;
+  margin: 5px 0;
 }
 
 .product-actions button {
-  margin-right: 5px;
-  padding: 4px 8px;
+  margin-right: 6px;
+  background: #118ab2;
+  color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
+  padding: 6px 10px;
   cursor: pointer;
-  font-size: 12px;
 }
-
-.add-cart { background: #06d6a0; color: white; }
-.view-btn { background: #118ab2; color: white; }
