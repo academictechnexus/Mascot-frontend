@@ -1,18 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Mascot Assistant</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="/public/widget.css?v=3" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mascot Chatbot</title>
+  <link rel="stylesheet" href="widget.css" />
 </head>
 <body>
-  <!-- Your site content here -->
+  <!-- Floating Mascot Bubble -->
+  <div id="mascot-bubble">
+    <img src="default-mascot.png" id="mascot-img" alt="Mascot"/>
+  </div>
 
-  <!-- Load the widget and force it to use your backend -->
-  <script
-    src="/public/widget.js?v=3"
-    data-api="https://mascot.academictechnexus.com"
-  ></script>
+  <!-- Chat Window -->
+  <div id="chat-window" class="hidden">
+    <div id="chat-header">
+      <span>🛍️ ShopBuddy</span>
+      <div>
+        <button id="upload-btn" title="Upload Mascot">⬆️</button>
+        <button id="mute-btn">🔊</button>
+        <button id="close-btn">✖</button>
+      </div>
+    </div>
+    <div id="chat-body"></div>
+    <div id="quick-replies">
+      <button class="quick-btn">🛒 View Cart</button>
+      <button class="quick-btn">📦 Track Order</button>
+      <button class="quick-btn">💰 Shop Deals</button>
+    </div>
+    <div id="chat-input-area">
+      <input type="text" id="chat-input" placeholder="Type a message..." />
+      <button id="send-btn">Send</button>
+    </div>
+  </div>
+
+  <!-- Hidden file input for mascot upload -->
+  <input type="file" id="mascot-upload" accept="image/*" style="display:none" />
+
+  <script src="widget.js"></script>
 </body>
 </html>
