@@ -98,6 +98,7 @@ body {
 #chat-window.minimized {
   height: 40px;
   overflow: hidden;
+  cursor: pointer; /* header click to expand */
 }
 
 /* Header */
