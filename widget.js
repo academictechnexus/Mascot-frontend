@@ -10,20 +10,25 @@ const minimizeBtn = document.getElementById("minimize-btn");
 const muteBtn = document.getElementById("mute-btn");
 const toggleModeBtn = document.getElementById("toggle-mode");
 const avatarContainer = document.getElementById("avatar-container");
+const avatarLoader = document.getElementById("avatar-loader");
 const uploadBtn = document.getElementById("upload-btn");
 const uploadInput = document.getElementById("mascot-upload");
 
 let isMuted = false;
 let currentMode = "mascot";
 
-// Toggle chat
+// Show chat
 mascotBubble.onclick = () => {
-  chatWindow.classList.toggle("hidden");
+  chatWindow.classList.remove("hidden");
+  if (currentMode === "avatar") avatarContainer.classList.add("show");
+  else mascotBubble.classList.add("speaking");
 };
 
 // Close chat
 closeBtn.onclick = () => {
   chatWindow.classList.add("hidden");
+  avatarContainer.classList.remove("show");
+  mascotBubble.classList.remove("speaking");
 };
 
 // Minimize chat
@@ -59,27 +64,21 @@ uploadInput.onchange = (e) => {
   }
 };
 
-// Switch Mascot ↔ Avatar
+// Toggle Mascot ↔ Avatar
 toggleModeBtn.onclick = () => {
   if (currentMode === "mascot") {
     currentMode = "avatar";
-    toggleModeBtn.innerText = "Switch to Mascot";
-
+    toggleModeBtn.innerText = "Mascot";
     mascotBubble.classList.add("hidden");
     avatarContainer.classList.remove("hidden");
     avatarContainer.classList.add("show");
-
     uploadBtn.disabled = true;
     resizeRenderer();
-
   } else {
     currentMode = "mascot";
-    toggleModeBtn.innerText = "Switch to Avatar";
-
-    avatarContainer.classList.add("hidden");
+    toggleModeBtn.innerText = "Avatar";
     avatarContainer.classList.remove("show");
     mascotBubble.classList.remove("hidden");
-
     uploadBtn.disabled = false;
   }
 };
@@ -147,17 +146,12 @@ clock = new THREE.Clock();
 
 function initAvatar(url) {
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(
-    45,
-    avatarContainer.clientWidth / avatarContainer.clientHeight,
-    0.1,
-    1000
-  );
+  camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
   camera.position.z = 2;
 
   renderer = new THREE.WebGLRenderer({ alpha: true });
-  renderer.setClearColor(0x000000, 0); // transparent background
-  renderer.setSize(avatarContainer.clientWidth, avatarContainer.clientHeight);
+  renderer.setClearColor(0x000000, 0);
+  renderer.setSize(300, 400);
   avatarContainer.appendChild(renderer.domElement);
 
   const light = new THREE.HemisphereLight(0xffffff, 0x444444);
@@ -165,16 +159,26 @@ function initAvatar(url) {
   scene.add(light);
 
   const loader = new THREE.GLTFLoader();
-  loader.load(url, (gltf) => {
-    avatar = gltf.scene;
-    avatar.scale.set(1.5, 1.5, 1.5);
-    scene.add(avatar);
+  loader.load(
+    url,
+    (gltf) => {
+      avatar = gltf.scene;
+      avatar.scale.set(1.5, 1.5, 1.5);
+      scene.add(avatar);
 
-    if (gltf.animations.length) {
-      mixer = new THREE.AnimationMixer(avatar);
-      mixer.clipAction(gltf.animations[0]).play();
+      if (gltf.animations.length) {
+        mixer = new THREE.AnimationMixer(avatar);
+        mixer.clipAction(gltf.animations[0]).play();
+      }
+
+      avatarLoader.style.display = "none"; // hide loader
+    },
+    undefined,
+    (error) => {
+      avatarLoader.innerText = "⚠️ Avatar failed to load";
+      console.error("Avatar load error:", error);
     }
-  });
+  );
 
   animate();
 }
@@ -187,9 +191,9 @@ function animate() {
 }
 
 function resizeRenderer() {
-  if (renderer && avatarContainer.clientWidth > 0) {
-    renderer.setSize(avatarContainer.clientWidth, avatarContainer.clientHeight);
-    camera.aspect = avatarContainer.clientWidth / avatarContainer.clientHeight;
+  if (renderer) {
+    renderer.setSize(300, 400);
+    camera.aspect = 300 / 400;
     camera.updateProjectionMatrix();
   }
 }
