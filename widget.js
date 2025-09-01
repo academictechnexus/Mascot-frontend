@@ -50,7 +50,7 @@ uploadInput.onchange = (e) => {
 sendBtn.onclick = async () => {
   const text = chatInput.value.trim();
   if (!text) return;
-  
+
   appendMessage("user", text);
   chatInput.value = "";
 
@@ -58,30 +58,34 @@ sendBtn.onclick = async () => {
   appendMessage("bot", "...", true);
 
   try {
-    // ✅ Replace with your backend endpoint (Railway)
-    const res = await fetch("/api/chat", {
+    // ✅ Call your backend with custom domain
+    const res = await fetch("https://mascot.academictechnexus.com/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: text }),
     });
 
     const data = await res.json();
-    const reply = data.text || "Sorry, I couldn't get a reply.";
-
     removeTyping();
-    appendMessage("bot", reply);
 
-    // Example products (replace with Shopify API later)
-    showProduct("AirMax 2024", "$49.99");
-    showProduct("Sneaker Pro", "$39.99");
+    // Handle bot reply
+    if (data.text) {
+      appendMessage("bot", data.text);
+      startMascotSpeaking(data.text);
+    }
 
-    startMascotSpeaking(reply);
+    // Handle product suggestions (if backend includes them)
+    if (data.products && Array.isArray(data.products)) {
+      data.products.forEach(p => {
+        showProduct(p.name, p.price);
+      });
+    }
 
   } catch (error) {
+    console.error("Chat error:", error);
     removeTyping();
-    appendMessage("bot", "⚠️ Backend not connected. Showing demo response.");
-    showProduct("Demo Shoe", "$00.00");
-    startMascotSpeaking("This is a demo reply while backend is offline.");
+    appendMessage("bot", "⚠️ Backend not reachable. Please try again later.");
+    startMascotSpeaking("Backend not reachable right now.");
   }
 };
 
