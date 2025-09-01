@@ -9,9 +9,11 @@ const closeBtn = document.getElementById("close-btn");
 const muteBtn = document.getElementById("mute-btn");
 const toggleModeBtn = document.getElementById("toggle-mode");
 const avatarContainer = document.getElementById("avatar-container");
+const uploadBtn = document.getElementById("upload-btn");
+const uploadInput = document.getElementById("mascot-upload");
 
 let isMuted = false;
-let currentMode = "mascot"; // default mode
+let currentMode = "mascot"; // default
 
 // Toggle chat window
 mascotBubble.onclick = () => {
@@ -35,29 +37,41 @@ muteBtn.onclick = () => {
   muteBtn.innerText = isMuted ? "🔇" : "🔊";
 };
 
-// Switch Mascot ↔ Avatar with fade
+// Upload Mascot
+uploadBtn.onclick = () => uploadInput.click();
+uploadInput.onchange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      mascotImg.src = ev.target.result;
+      localStorage.setItem("mascotImg", ev.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+// Switch Mascot ↔ Avatar
 toggleModeBtn.onclick = () => {
   if (currentMode === "mascot") {
     currentMode = "avatar";
     toggleModeBtn.innerText = "Switch to Mascot";
 
     mascotBubble.classList.add("hidden");
-    setTimeout(() => {
-      mascotBubble.style.display = "none";
-      avatarContainer.style.display = "block";
-      setTimeout(() => avatarContainer.classList.remove("hidden"), 50);
-    }, 500);
+    avatarContainer.classList.remove("hidden");
+    avatarContainer.classList.add("show");
+
+    uploadBtn.disabled = true; // disable mascot upload
 
   } else {
     currentMode = "mascot";
     toggleModeBtn.innerText = "Switch to Avatar";
 
     avatarContainer.classList.add("hidden");
-    setTimeout(() => {
-      avatarContainer.style.display = "none";
-      mascotBubble.style.display = "flex";
-      setTimeout(() => mascotBubble.classList.remove("hidden"), 50);
-    }, 500);
+    avatarContainer.classList.remove("show");
+    mascotBubble.classList.remove("hidden");
+
+    uploadBtn.disabled = false; // enable mascot upload
   }
 };
 
@@ -85,21 +99,14 @@ sendBtn.onclick = async () => {
       if (currentMode === "mascot") startMascotSpeaking(data.text);
       else startAvatarSpeaking(data.text);
     }
-
-    if (data.products && Array.isArray(data.products)) {
-      data.products.forEach(p => showProduct(p.name, p.price));
-    }
-
   } catch (error) {
     console.error("Chat error:", error);
     removeTyping();
     appendMessage("bot", "⚠️ Backend not reachable.");
-    if (currentMode === "mascot") startMascotSpeaking("Backend not reachable.");
-    else startAvatarSpeaking("Backend not reachable.");
   }
 };
 
-// Append message
+// Append + remove typing
 function appendMessage(sender, text, isTyping = false) {
   const msg = document.createElement("div");
   msg.className = `message ${sender}`;
@@ -108,33 +115,14 @@ function appendMessage(sender, text, isTyping = false) {
   chatBody.appendChild(msg);
   chatBody.scrollTop = chatBody.scrollHeight;
 }
-
 function removeTyping() {
   const typing = document.getElementById("typing");
   if (typing) typing.remove();
 }
 
-function showProduct(name, price) {
-  const card = document.createElement("div");
-  card.className = "product-card";
-  card.innerHTML = `
-    <div class="product-title">${name}</div>
-    <div class="product-price">⭐️⭐️⭐️⭐️☆ ${price}</div>
-    <div class="product-actions">
-      <button class="add-cart">Add to Cart</button>
-      <button class="view-btn">View</button>
-    </div>
-  `;
-  chatBody.appendChild(card);
-  chatBody.scrollTop = chatBody.scrollHeight;
-}
-
-//
-// 🔹 Mascot Speaking
-//
+// Mascot speaking
 function startMascotSpeaking(text) {
   mascotBubble.classList.add("speaking");
-
   if (!isMuted) {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.onend = () => mascotBubble.classList.remove("speaking");
@@ -144,9 +132,7 @@ function startMascotSpeaking(text) {
   }
 }
 
-//
-// 🔹 Avatar Speaking (ReadyPlayerMe)
-//
+// Avatar speaking
 let scene, camera, renderer, avatar, mixer, clock;
 clock = new THREE.Clock();
 
@@ -190,7 +176,7 @@ function animate() {
   if (renderer) renderer.render(scene, camera);
 }
 
-// 👇 Load your avatar
+// Load ReadyPlayerMe avatar
 initAvatar("https://models.readyplayer.me/68b5e67fbac430a52ce1260e.glb");
 
 function startAvatarSpeaking(text) {
