@@ -3,7 +3,7 @@ body {
   font-family: Arial, sans-serif;
 }
 
-/* Mascot bubble in corner */
+/* Mascot bubble */
 #mascot-bubble {
   position: fixed;
   bottom: 20px;
@@ -27,7 +27,7 @@ body {
   border-radius: 50%;
 }
 
-/* Mascot speaking: walk to center + dance */
+/* Mascot speaking animation */
 #mascot-bubble.speaking {
   bottom: 40%;
   right: 40%;
@@ -52,7 +52,7 @@ body {
   100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0); }
 }
 
-/* Fade effect for smooth transitions */
+/* Fade effect */
 .fade {
   opacity: 1;
   transition: opacity 0.5s ease-in-out;
@@ -61,6 +61,16 @@ body {
 .fade.hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+/* Avatar slide in */
+.avatar-slide {
+  transform: translateX(100%);
+  transition: transform 0.8s ease, opacity 0.5s ease-in-out;
+}
+.avatar-slide.show {
+  transform: translateX(0);
+  opacity: 1;
 }
 
 /* Chat window */
@@ -125,7 +135,7 @@ body {
   border-radius: 10px;
 }
 
-#send-btn, #mic-btn, #mute-btn, #toggle-mode, #close-btn {
+#send-btn, #mic-btn, #mute-btn, #toggle-mode, #upload-btn, #close-btn {
   margin-left: 6px;
   background: #06d6a0;
   color: white;
