@@ -1,11 +1,11 @@
 const mascotBubble = document.getElementById("mascot-bubble");
 const mascotImg = document.getElementById("mascot-img");
 const chatWindow = document.getElementById("chat-window");
+const chatHeader = document.getElementById("chat-header");
 const chatBody = document.getElementById("chat-body");
 const sendBtn = document.getElementById("send-btn");
 const micBtn = document.getElementById("mic-btn");
 const chatInput = document.getElementById("chat-input");
-const closeBtn = document.getElementById("close-btn");
 const minimizeBtn = document.getElementById("minimize-btn");
 const muteBtn = document.getElementById("mute-btn");
 const toggleModeBtn = document.getElementById("toggle-mode");
@@ -20,20 +20,19 @@ let currentMode = "mascot";
 // Show chat
 mascotBubble.onclick = () => {
   chatWindow.classList.remove("hidden");
+  chatWindow.classList.remove("minimized");
   if (currentMode === "avatar") avatarContainer.classList.add("show");
-  else mascotBubble.classList.add("speaking");
-};
-
-// Close chat
-closeBtn.onclick = () => {
-  chatWindow.classList.add("hidden");
-  avatarContainer.classList.remove("show");
-  mascotBubble.classList.remove("speaking");
 };
 
 // Minimize chat
 minimizeBtn.onclick = () => {
   chatWindow.classList.toggle("minimized");
+};
+// Restore on header click
+chatHeader.onclick = (e) => {
+  if (chatWindow.classList.contains("minimized") && e.target.id !== "minimize-btn") {
+    chatWindow.classList.remove("minimized");
+  }
 };
 
 // Enter to send
@@ -146,7 +145,7 @@ clock = new THREE.Clock();
 
 function initAvatar(url) {
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+  camera = new THREE.PerspectiveCamera(45, 300 / 400, 0.1, 1000);
   camera.position.z = 2;
 
   renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -198,7 +197,7 @@ function resizeRenderer() {
   }
 }
 
-// Load ReadyPlayerMe avatar
+// ✅ Preload half-body avatar
 initAvatar("https://models.readyplayer.me/68b5e67fbac430a52ce1260e.glb");
 
 function startAvatarSpeaking(text) {
