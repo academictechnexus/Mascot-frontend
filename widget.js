@@ -1,10 +1,7 @@
-// --- BEGIN PATCH: dynamic BACKEND_URL + helper callChat() ---
-// Determines backend endpoint in this order:
-// 1) data-backend attribute on the <script> tag that loads widget.js
-// 2) window.MASCOT_CONFIG.backend (if you set config.js)
-// 3) fallback hardcoded URL (your repo default)
+// widget.js - Right-side Panel logic
+// ---------------------------
+// Dynamic BACKEND_URL detection
 const BACKEND_FALLBACK = "https://mascot.academictechnexus.com/api/chat"; // fallback
-
 const BACKEND_URL = (function () {
   try {
     const currentScript =
@@ -21,240 +18,247 @@ const BACKEND_URL = (function () {
       if (dataBackend && dataBackend.trim().length) return dataBackend.trim();
     }
   } catch (e) {}
-  if (window.MASCOT_CONFIG && window.MASCOT_CONFIG.backend)
-    return window.MASCOT_CONFIG.backend;
+  if (window.MASCOT_CONFIG && window.MASCOT_CONFIG.backend) return window.MASCOT_CONFIG.backend;
   return BACKEND_FALLBACK;
 })();
 
-// Helper wrapper to call chat API consistently
+// callChat helper: ensures consistent POST to backend
 async function callChat(payload) {
   try {
     const resp = await fetch(BACKEND_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
     if (!resp.ok) {
       const text = await resp.text();
-      throw new Error(`Backend returned ${resp.status}: ${text}`);
+      throw new Error(`Backend ${resp.status}: ${text}`);
     }
-    const data = await resp.json();
-    return data;
+    return await resp.json();
   } catch (err) {
     console.error("callChat error:", err);
     throw err;
   }
 }
-// --- END PATCH ---
 
-const mascotBubble = document.getElementById("mascot-bubble");
-const mascotImg = document.getElementById("mascot-img");
-const chatWindow = document.getElementById("chat-window");
-const chatHeader = document.getElementById("chat-header");
+/* ---------- DOM elements ---------- */
+const panel = document.getElementById("mascot-panel");
+const toggleBtn = document.getElementById("mascot-toggle");
+const minimizeBtn = document.getElementById("minimize-btn");
+const closeBtn = document.getElementById("close-btn");
 const chatBody = document.getElementById("chat-body");
 const sendBtn = document.getElementById("send-btn");
-const micBtn = document.getElementById("mic-btn");
 const chatInput = document.getElementById("chat-input");
-const minimizeBtn = document.getElementById("minimize-btn");
 const muteBtn = document.getElementById("mute-btn");
-const toggleModeBtn = document.getElementById("toggle-mode");
-const avatarContainer = document.getElementById("avatar-container");
-const avatarLoader = document.getElementById("avatar-loader");
 const uploadBtn = document.getElementById("upload-btn");
 const uploadInput = document.getElementById("mascot-upload");
+const avatarContainer = document.getElementById("avatar-container");
+const avatarLoader = document.getElementById("avatar-loader");
+const openStoreBtn = document.getElementById("open-store-btn");
 
+/* state */
 let isMuted = false;
-let currentMode = "mascot";
+let avatarInitialized = false;
+let storeId = null;
 
-// Show chat
-mascotBubble.onclick = () => {
-  chatWindow.classList.remove("hidden");
-  chatWindow.classList.remove("minimized");
-  if (currentMode === "avatar") avatarContainer.classList.add("show");
-};
+// attempt to populate store id from script attr
+(function setStoreId() {
+  try {
+    const currentScript =
+      document.currentScript ||
+      Array.from(document.scripts).find((s) => s.src && s.src.indexOf("widget.js") !== -1);
+    if (currentScript) storeId = currentScript.getAttribute("data-store-id") || null;
+    if (!storeId && window.MASCOT_CONFIG && window.MASCOT_CONFIG.store_id) storeId = window.MASCOT_CONFIG.store_id;
+  } catch (e) {}
+})();
 
-// Minimize chat
-minimizeBtn.onclick = () => {
-  chatWindow.classList.toggle("minimized");
-};
-// Restore on header click
-chatHeader.onclick = (e) => {
-  if (chatWindow.classList.contains("minimized") && e.target.id !== "minimize-btn") {
-    chatWindow.classList.remove("minimized");
-  }
-};
+/* utility: add message */
+function appendMessage(sender, text, meta) {
+  const el = document.createElement("div");
+  el.className = "message " + (sender === "user" ? "user" : "bot");
+  el.innerHTML = `<div class="text">${escapeHtml(text)}</div>` + (meta ? `<div class="time">${escapeHtml(meta)}</div>` : "");
+  chatBody.appendChild(el);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"'`]/g, (m) => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;","`":"&#96;" }[m]));
+}
 
-// Enter to send
-chatInput.addEventListener("keypress", (event) => {
-  if (event.key === "Enter") {
-    event.preventDefault();
-    sendBtn.click();
+/* INITIAL UI wiring */
+function openPanel() {
+  panel.classList.remove("closed");
+  panel.setAttribute("aria-hidden", "false");
+  toggleBtn.setAttribute("aria-expanded", "true");
+}
+function closePanel() {
+  panel.classList.add("closed");
+  panel.setAttribute("aria-hidden", "true");
+  toggleBtn.setAttribute("aria-expanded", "false");
+}
+toggleBtn.addEventListener("click", () => {
+  if (panel.classList.contains("closed")) openPanel();
+  else closePanel();
+});
+minimizeBtn.addEventListener("click", () => {
+  closePanel();
+});
+closeBtn.addEventListener("click", () => {
+  closePanel();
+});
+openStoreBtn && openStoreBtn.addEventListener("click", () => {
+  // open the storefront in a new tab; if store_id present we try to build a URL
+  if (storeId) {
+    // merchant-specific: you can change to proper shop domain mapping
+    window.open(`https://${storeId}.myshopify.com`, "_blank");
+  } else {
+    window.open("/", "_blank");
   }
 });
 
-// Mute
-muteBtn.onclick = () => {
+/* mute */
+muteBtn.addEventListener("click", () => {
   isMuted = !isMuted;
   muteBtn.innerText = isMuted ? "🔇" : "🔊";
-};
+});
 
-// Upload mascot
-uploadBtn.onclick = () => uploadInput.click();
-uploadInput.onchange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      mascotImg.src = ev.target.result;
-      localStorage.setItem("mascotImg", ev.target.result);
+/* upload mascot image (client-side preview then send to backend if you want) */
+uploadBtn.addEventListener("click", () => uploadInput.click());
+uploadInput.addEventListener("change", async (ev) => {
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  // preview to avatar container as img
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    avatarContainer.style.backgroundImage = `url(${e.target.result})`;
+    avatarContainer.style.backgroundSize = "cover";
+    avatarContainer.innerText = "";
+  };
+  reader.readAsDataURL(file);
+
+  // optionally: upload to backend if you have an upload endpoint
+  try {
+    const form = new FormData();
+    form.append("mascot", file);
+    // if you have /mascot/upload endpoint, uncomment and use:
+    // const upResp = await fetch(BACKEND_URL.replace(/\/api\/chat\/?$/,'') + '/mascot/upload', { method:'POST', body: form});
+    // console.log('upload resp', upResp.status);
+  } catch (err) {
+    console.warn("upload failed", err);
+  }
+});
+
+/* lazy avatar load when panel opens first time */
+toggleBtn.addEventListener("click", initAvatarOnce);
+function initAvatarOnce() {
+  if (avatarInitialized) return;
+  avatarInitialized = true;
+  // lazy load three.js and GLTFLoader (CDN)
+  const script1 = document.createElement("script");
+  script1.src = "https://cdn.jsdelivr.net/npm/three@0.156.1/build/three.min.js";
+  script1.onload = () => {
+    const s2 = document.createElement("script");
+    s2.src = "https://cdn.jsdelivr.net/npm/three@0.156.1/examples/js/loaders/GLTFLoader.js";
+    s2.onload = () => {
+      loadAvatarModel();
     };
-    reader.readAsDataURL(file);
-  }
-};
+    document.body.appendChild(s2);
+  };
+  document.body.appendChild(script1);
+}
 
-// Toggle Mascot ↔ Avatar
-toggleModeBtn.onclick = () => {
-  if (currentMode === "mascot") {
-    currentMode = "avatar";
-    toggleModeBtn.innerText = "Mascot";
-    mascotBubble.classList.add("hidden");
-    avatarContainer.classList.remove("hidden");
-    avatarContainer.classList.add("show");
-    uploadBtn.disabled = true;
-    resizeRenderer();
-  } else {
-    currentMode = "mascot";
-    toggleModeBtn.innerText = "Avatar";
-    avatarContainer.classList.remove("show");
-    mascotBubble.classList.remove("hidden");
-    uploadBtn.disabled = false;
-  }
-};
+/* load avatar model - simple face rotation animation */
+function loadAvatarModel() {
+  try {
+    avatarLoader.innerText = "Loading avatar...";
+    // try load a sample GLB if you want (fallback to static)
+    if (window.THREE && window.THREE.GLTFLoader) {
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, 110/140, 0.1, 1000);
+      camera.position.z = 2.2;
+      const renderer = new THREE.WebGLRenderer({ alpha: true });
+      renderer.setSize(110, 140);
+      // replace avatarContainer contents with renderer canvas
+      avatarContainer.innerHTML = "";
+      avatarContainer.appendChild(renderer.domElement);
 
-// Send message
-sendBtn.onclick = async () => {
-  const text = chatInput.value.trim();
+      const light = new THREE.HemisphereLight(0xffffff, 0x444444);
+      light.position.set(0, 20, 0);
+      scene.add(light);
+
+      // GLTF loader - you can change the GLB url to your model.
+      const loader = new THREE.GLTFLoader();
+      const sampleGlb = "https://models.readyplayer.me/68b5e67fbac430a52ce1260e.glb";
+      loader.load(sampleGlb, (gltf) => {
+        const avatar = gltf.scene;
+        avatar.scale.set(1.2,1.2,1.2);
+        scene.add(avatar);
+        // simple rotate animation
+        function animate() {
+          requestAnimationFrame(animate);
+          avatar.rotation.y += 0.005;
+          renderer.render(scene, camera);
+        }
+        animate();
+        avatarLoader.style.display = "none";
+      }, undefined, (err) => {
+        console.warn("avatar load error", err);
+        avatarContainer.innerText = "Avatar failed";
+      });
+    } else {
+      avatarContainer.innerText = "Avatar ready";
+    }
+  } catch (e) {
+    console.warn("avatar init exception", e);
+    avatarContainer.innerText = "Avatar error";
+  }
+}
+
+/* send message flow */
+async function sendMessage() {
+  const text = chatInput.value && chatInput.value.trim();
   if (!text) return;
-
-  appendMessage("user", text);
+  appendMessage("user", text, null);
   chatInput.value = "";
-  appendMessage("bot", "...", true);
+  // show typing placeholder
+  const typingEl = document.createElement("div");
+  typingEl.className = "message bot typing";
+  typingEl.innerText = "…";
+  chatBody.appendChild(typingEl);
+  chatBody.scrollTop = chatBody.scrollHeight;
 
   try {
-    const data = await callChat({ message: text });
-    removeTyping();
-
-    if (data.text || data.reply) {
-      const replyText = data.text || data.reply;
-      appendMessage("bot", replyText);
-      if (currentMode === "mascot") startMascotSpeaking(replyText);
-      else startAvatarSpeaking(replyText);
-    } else {
-      appendMessage("bot", "⚠️ No response from backend.");
-    }
+    const payload = { message: text };
+    if (storeId) payload.store_id = storeId;
+    const res = await callChat(payload);
+    // remove typing
+    typingEl.remove();
+    // backend may return data.text or data.reply
+    const replyText = res?.text || res?.reply || (typeof res === "string" ? res : "No response");
+    appendMessage("bot", replyText, null);
+    if (!isMuted) speak(replyText);
   } catch (err) {
-    console.error("Chat error:", err);
-    removeTyping();
-    appendMessage("bot", "⚠️ Backend not reachable.");
-  }
-};
-
-// Helpers
-function appendMessage(sender, text, isTyping = false) {
-  const msg = document.createElement("div");
-  msg.className = `message ${sender}`;
-  if (isTyping) msg.id = "typing";
-  msg.innerText = text;
-  chatBody.appendChild(msg);
-  chatBody.scrollTop = chatBody.scrollHeight;
-}
-function removeTyping() {
-  const typing = document.getElementById("typing");
-  if (typing) typing.remove();
-}
-
-// Mascot speaking
-function startMascotSpeaking(text) {
-  mascotBubble.classList.add("speaking");
-  if (!isMuted) {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.onend = () => mascotBubble.classList.remove("speaking");
-    speechSynthesis.speak(utterance);
-  } else {
-    setTimeout(() => mascotBubble.classList.remove("speaking"), 2000);
+    typingEl.remove();
+    appendMessage("bot", "⚠️ Could not reach backend. Please try again.");
   }
 }
 
-// Avatar (Three.js)
-let scene, camera, renderer, avatar, mixer, clock;
-clock = new THREE.Clock();
-
-function initAvatar(url) {
-  scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(45, 300 / 400, 0.1, 1000);
-  camera.position.z = 2;
-
-  renderer = new THREE.WebGLRenderer({ alpha: true });
-  renderer.setClearColor(0x000000, 0);
-  renderer.setSize(300, 400);
-  avatarContainer.appendChild(renderer.domElement);
-
-  const light = new THREE.HemisphereLight(0xffffff, 0x444444);
-  light.position.set(0, 20, 0);
-  scene.add(light);
-
-  const loader = new THREE.GLTFLoader();
-  loader.load(
-    url,
-    (gltf) => {
-      avatar = gltf.scene;
-      avatar.scale.set(1.5, 1.5, 1.5);
-      scene.add(avatar);
-
-      if (gltf.animations.length) {
-        mixer = new THREE.AnimationMixer(avatar);
-        mixer.clipAction(gltf.animations[0]).play();
-      }
-
-      avatarLoader.style.display = "none"; // hide loader
-    },
-    undefined,
-    (error) => {
-      avatarLoader.innerText = "⚠️ Avatar failed to load";
-      console.error("Avatar load error:", error);
-    }
-  );
-
-  animate();
+/* simple TTS */
+function speak(text) {
+  try {
+    const u = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  } catch (e) { console.warn("TTS error", e); }
 }
 
-function animate() {
-  requestAnimationFrame(animate);
-  const delta = clock.getDelta();
-  if (mixer) mixer.update(delta);
-  if (renderer) renderer.render(scene, camera);
-}
+/* wire send */
+sendBtn.addEventListener("click", sendMessage);
+chatInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
 
-function resizeRenderer() {
-  if (renderer) {
-    renderer.setSize(300, 400);
-    camera.aspect = 300 / 400;
-    camera.updateProjectionMatrix();
-  }
-}
-
-// ✅ Preload half-body avatar
-initAvatar("https://models.readyplayer.me/68b5e67fbac430a52ce1260e.glb");
-
-function startAvatarSpeaking(text) {
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.onboundary = () => {
-    if (avatar) avatar.rotation.y = Math.sin(Date.now() * 0.01) * 0.3;
-  };
-  utterance.onend = () => {
-    if (avatar) avatar.rotation.y = 0;
-  };
-  speechSynthesis.speak(utterance);
-}
+/* simple init - ensure panel hidden/visible states */
+(function initWidget() {
+  // hide panel at start
+  panel.classList.add("closed");
+  // ensure minimal content
+  appendMessage("bot", "Hi! Ask me about products, shipping, or returns.");
+})();
