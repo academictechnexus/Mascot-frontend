@@ -1,3 +1,54 @@
+// --- BEGIN PATCH: dynamic BACKEND_URL + helper callChat() ---
+// Determines backend endpoint in this order:
+// 1) data-backend attribute on the <script> tag that loads widget.js
+// 2) window.MASCOT_CONFIG.backend (if you set config.js)
+// 3) fallback hardcoded URL (your repo default)
+const BACKEND_FALLBACK = "https://mascot.academictechnexus.com/api/chat"; // fallback
+
+const BACKEND_URL = (function () {
+  try {
+    const currentScript =
+      document.currentScript ||
+      (function () {
+        const scripts = document.getElementsByTagName("script");
+        for (let s of scripts) {
+          if (s.src && s.src.indexOf("widget.js") !== -1) return s;
+        }
+        return null;
+      })();
+    if (currentScript) {
+      const dataBackend = currentScript.getAttribute("data-backend");
+      if (dataBackend && dataBackend.trim().length) return dataBackend.trim();
+    }
+  } catch (e) {}
+  if (window.MASCOT_CONFIG && window.MASCOT_CONFIG.backend)
+    return window.MASCOT_CONFIG.backend;
+  return BACKEND_FALLBACK;
+})();
+
+// Helper wrapper to call chat API consistently
+async function callChat(payload) {
+  try {
+    const resp = await fetch(BACKEND_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!resp.ok) {
+      const text = await resp.text();
+      throw new Error(`Backend returned ${resp.status}: ${text}`);
+    }
+    const data = await resp.json();
+    return data;
+  } catch (err) {
+    console.error("callChat error:", err);
+    throw err;
+  }
+}
+// --- END PATCH ---
+
 const mascotBubble = document.getElementById("mascot-bubble");
 const mascotImg = document.getElementById("mascot-img");
 const chatWindow = document.getElementById("chat-window");
@@ -92,19 +143,16 @@ sendBtn.onclick = async () => {
   appendMessage("bot", "...", true);
 
   try {
-    const res = await fetch("https://mascot.academictechnexus.com/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text }),
-    });
-
-    const data = await res.json();
+    const data = await callChat({ message: text });
     removeTyping();
 
-    if (data.text) {
-      appendMessage("bot", data.text);
-      if (currentMode === "mascot") startMascotSpeaking(data.text);
-      else startAvatarSpeaking(data.text);
+    if (data.text || data.reply) {
+      const replyText = data.text || data.reply;
+      appendMessage("bot", replyText);
+      if (currentMode === "mascot") startMascotSpeaking(replyText);
+      else startAvatarSpeaking(replyText);
+    } else {
+      appendMessage("bot", "⚠️ No response from backend.");
     }
   } catch (err) {
     console.error("Chat error:", err);
