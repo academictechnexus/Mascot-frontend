@@ -1,43 +1,76 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Shop Assistant Chatbot</title>
-  <link rel="stylesheet" href="widget.css">
+  <meta charset="utf-8" />
+  <title>Mascot Shop Assistant</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <!-- Styles (your existing widget.css file should be present) -->
+  <link rel="stylesheet" href="widget.css" />
+
+  <!-- THREE.js needed for avatar rendering (kept as in your project) -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.156.1/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.156.1/examples/js/loaders/GLTFLoader.js"></script>
+
+  <!-- Optional global config (if you want to set backend globally instead of data-backend) -->
+  <!--
+  <script>
+    window.MASCOT_CONFIG = {
+      backend: "https://api.your-backend.com/api/chat"
+    };
+  </script>
+  -->
 </head>
 <body>
   <!-- Floating Mascot Bubble -->
   <div id="mascot-bubble" class="fade">
-    <img id="mascot-img" src="/mascot_idle.png" alt="Mascot">
+    <!-- Use the default local image (no leading slash) to avoid 404s on Vercel-->
+    <img id="mascot-img" src="default-mascot.png" alt="Mascot" />
   </div>
 
-  <!-- Chat Window -->
+  <!-- Chat window -->
   <div id="chat-window" class="hidden">
     <div id="chat-header">
-      <span class="chat-title">Shop Assistant</span>
-      <div class="chat-controls">
-        <button id="toggle-mode">Avatar</button>
-        <button id="upload-btn">Mascot</button>
-        <input type="file" id="mascot-upload" accept="image/*" style="display:none;">
-        <button id="minimize-btn">➖</button>
-      </div>
+      <div id="chat-title">Shop Assistant</div>
+      <button id="minimize-btn">_</button>
     </div>
+
     <div id="chat-body"></div>
-    <div id="chat-input-area">
-      <input id="chat-input" placeholder="Type your message..."/>
-      <button id="send-btn">➤</button>
+
+    <div id="chat-controls">
+      <input id="chat-input" type="text" placeholder="Ask about products, shipping, returns..." />
+      <button id="send-btn">Send</button>
       <button id="mic-btn">🎤</button>
       <button id="mute-btn">🔊</button>
+      <button id="toggle-mode">Avatar</button>
+    </div>
+
+    <div id="avatar-container" class="hidden">
+      <div id="avatar-loader">Loading avatar...</div>
+      <!-- three.js will append canvas here -->
+    </div>
+
+    <div id="upload-area">
+      <button id="upload-btn">Upload Mascot</button>
+      <input id="mascot-upload" type="file" accept="image/*" style="display:none" />
     </div>
   </div>
 
-  <!-- Avatar Container -->
-  <div id="avatar-container" class="fade hidden avatar-slide">
-    <div id="avatar-loader">Loading Avatar...</div>
-  </div>
+  <!-- small helper footer (optional) -->
+  <footer style="display:none;">
+    This is the Mascot frontend UI for the Shop Assistant.
+  </footer>
 
+  <!-- Load widget script (deployed on your Vercel). 
+       Replace <your-vercel-domain> with your deployed domain.
+       Replace data-backend value with your actual backend chat endpoint (must be HTTPS).
+       Shopify embed example: data-store-id="{{ shop.id }}" (Shopify will populate this).
+  -->
+  <!-- Example merchant snippet to share with store owners:
+  <script src="https://<your-vercel-domain>.vercel.app/widget.js"
+          data-backend="https://api.your-backend.com/api/chat"
+          data-store-id="{{ shop.id }}"></script>
+  -->
   <script src="widget.js"></script>
 </body>
 </html>
