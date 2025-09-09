@@ -5,7 +5,6 @@
   <title>Shop Assistant — Right Panel</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="widget.css" />
-  <!-- Load three only when avatar is shown (we lazy load in widget.js) -->
 </head>
 <body>
   <!-- RIGHT-SIDE PANEL WIDGET -->
@@ -30,6 +29,7 @@
           <div id="avatar-container" class="avatar-container">
             <div id="avatar-loader" class="avatar-loader">Avatar</div>
           </div>
+
           <div class="avatar-actions">
             <button id="upload-btn" class="icon-ghost" title="Upload Mascot">⬆️</button>
             <input id="mascot-upload" type="file" accept="image/*" style="display:none" />
@@ -80,14 +80,13 @@
     <span class="toggle-text">Assistant</span>
   </button>
 
-  <!-- Merchant embed snippet (give this to stores) -->
-  <!--
+  <!-- Example merchant snippet (give this to stores when ready):
   <script src="https://<your-vercel-domain>.vercel.app/widget.js"
           data-backend="https://api.your-backend.com/api/chat"
           data-store-id="{{ shop.id }}"></script>
   -->
 
-  <!-- Local dev/test load -->
+  <!-- Local load for testing -->
   <script src="widget.js"></script>
 </body>
 </html>
