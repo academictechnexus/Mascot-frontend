@@ -5,88 +5,85 @@
   <title>Shop Assistant — Right Panel</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="widget.css" />
+  <!-- Lottie CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.9.6/lottie.min.js" defer></script>
+  <!-- Config -->
+  <script type="module" src="config.js" defer></script>
+  <!-- Widget -->
+  <script type="module" src="widget.js" defer></script>
 </head>
 <body>
   <!-- RIGHT-SIDE PANEL WIDGET -->
-  <div id="mascot-panel" class="mascot-panel closed" aria-hidden="true">
-    <div class="panel-handle">
+  <div id="mascot-panel" class="mascot-panel closed" aria-hidden="true" role="region" aria-label="Chat widget">
+    <div class="panel-handle" id="panel-handle" tabindex="0" role="button" aria-pressed="false">
       <div class="brand">
-        <div class="logo">SA</div>
+        <div class="logo" aria-hidden>SA</div>
         <div class="meta">
           <div class="title">Shop Assistant</div>
-          <div class="status" id="shop-status">Online</div>
+          <div class="subtitle">Custom Shopify apps & integrations</div>
         </div>
       </div>
-      <div class="panel-actions">
-        <button id="minimize-btn" class="small-btn" title="Minimize">—</button>
-        <button id="close-btn" class="small-btn" title="Close">✕</button>
-      </div>
-    </div>
-
-    <div class="panel-body">
-      <div class="left-column">
-        <div class="avatar-slot">
-          <div id="avatar-container" class="avatar-container">
-            <div id="avatar-loader" class="avatar-loader">Avatar</div>
-          </div>
-
-          <div class="avatar-actions">
-            <button id="upload-btn" class="icon-ghost" title="Upload Mascot">⬆️</button>
-            <input id="mascot-upload" type="file" accept="image/*" style="display:none" />
-            <button id="mute-btn" class="icon-ghost" title="Mute/Unmute">🔊</button>
-          </div>
-        </div>
-
-        <div class="info-cards">
-          <div class="card">
-            <div class="card-title">Quick Actions</div>
-            <div class="chip-row">
-              <button class="chip">Shipping</button>
-              <button class="chip">Returns</button>
-              <button class="chip">Sizes</button>
-            </div>
-          </div>
-          <div class="card small">
-            <div class="card-title">Visitor</div>
-            <div class="card-body">Anonymous</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="right-column">
-        <div id="chat-body" class="messages" aria-live="polite"></div>
-
-        <div class="composer">
-          <input id="chat-input" type="text" placeholder="Ask about products, orders, shipping..." />
-          <div class="composer-actions">
-            <button id="attach-btn" class="compose-btn" title="Attach">📎</button>
-            <button id="send-btn" class="compose-send" title="Send">Send</button>
-          </div>
-        </div>
+      <div class="toggle">
+        <button id="open-btn" aria-label="Open chat">💬</button>
       </div>
     </div>
 
-    <div class="panel-footer">
-      <div class="footer-left">Powered by <strong>YourBrand</strong></div>
-      <div class="footer-right">
-        <button id="open-store-btn" class="ghost">Open in Store</button>
+    <div class="panel-body" id="panel-body">
+      <div class="header">
+        <div class="header-left">
+          <div id="mascot-lottie" class="mascot-lottie" aria-hidden></div>
+        </div>
+        <div class="header-right">
+          <div class="h-title">Hi — I'm ShopBot</div>
+          <div class="h-sub">I can help with quotes, demos, or quick fixes.</div>
+        </div>
+      </div>
+
+      <div class="chat" id="chat" role="log" aria-live="polite">
+        <!-- messages appear here -->
+      </div>
+
+      <div class="quick-buttons" id="quick-buttons" aria-hidden="false">
+        <!-- quick replies populated by script -->
+      </div>
+
+      <form id="chat-form" class="chat-form" aria-label="Send a message">
+        <button type="button" id="mic-btn" title="Voice input">🎙</button>
+        <input id="chat-input" type="text" placeholder="Ask about apps, pricing, demo..." autocomplete="off" />
+        <button id="send-btn" type="submit">Send</button>
+      </form>
+
+      <div class="bottom-actions">
+        <button id="book-demo" class="secondary">Book a demo</button>
+        <button id="get-quote" class="primary">Get a quote</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Lead modal (hidden) -->
+  <div id="lead-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="lead-title">
+    <div class="modal-panel">
+      <h3 id="lead-title">Request a free quote</h3>
+      <p class="muted">Share a few details and we'll email a short estimate.</p>
+      <label>
+        Name
+        <input id="lead-name" type="text" />
+      </label>
+      <label>
+        Email
+        <input id="lead-email" type="email" />
+      </label>
+      <label>
+        Brief description (what do you want?)
+        <textarea id="lead-need"></textarea>
+      </label>
+      <div class="modal-actions">
+        <button id="lead-submit" class="primary">Send</button>
+        <button id="lead-cancel" class="secondary">Cancel</button>
       </div>
     </div>
   </div>
 
-  <!-- Floating slim toggle on page right -->
-  <button id="mascot-toggle" class="mascot-toggle" aria-expanded="false" aria-controls="mascot-panel">
-    <span class="toggle-dot"></span>
-    <span class="toggle-text">Assistant</span>
-  </button>
-
-  <!-- Example merchant snippet (give this to stores when ready):
-  <script src="https://<your-vercel-domain>.vercel.app/widget.js"
-          data-backend="https://api.your-backend.com/api/chat"
-          data-store-id="{{ shop.id }}"></script>
-  -->
-
-  <!-- Local load for testing -->
-  <script src="widget.js"></script>
 </body>
 </html>
