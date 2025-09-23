@@ -7,29 +7,34 @@
   <link rel="stylesheet" href="widget.css" />
 </head>
 <body>
-  <!-- Chatbot Mascot Widget -->
+  <!-- Chat UI -->
   <div id="mascot-panel" class="mascot-panel closed" aria-hidden="true">
-    <div class="panel-header">
+    <header class="panel-header">
       <div class="brand">
         <div class="logo">SA</div>
         <div class="meta">
           <div class="title">Shop Assistant</div>
-          <div class="subtitle">Your mascot-powered assistant</div>
+          <div class="subtitle">Mascot-powered support</div>
         </div>
       </div>
       <div class="controls">
         <button id="minimize-btn" class="icon-btn" title="Minimize">—</button>
         <button id="close-btn" class="icon-btn" title="Close">✕</button>
       </div>
-    </div>
+    </header>
 
-    <div class="panel-body">
-      <div class="left">
+    <main class="panel-body">
+      <aside class="left">
         <div id="avatar-wrap" class="avatar-wrap">
           <div id="avatar" class="avatar">
             <img id="avatar-img" src="default-mascot.png" alt="mascot" />
             <div id="avatar-mouth" class="avatar-mouth"></div>
             <div id="avatar-spark" class="avatar-spark"></div>
+          </div>
+
+          <!-- floating mascot element that will "pop out" -->
+          <div id="floating-mascot" class="floating-mascot hidden" aria-hidden="true">
+            <img id="floating-img" src="default-mascot.png" alt="mascot floating" />
           </div>
         </div>
 
@@ -45,44 +50,42 @@
             <span id="upload-btn" class="upload-btn">Upload mascot</span>
           </label>
         </div>
-      </div>
+      </aside>
 
-      <div class="right">
+      <section class="right">
         <div id="chat-body" class="chat-body" aria-live="polite"></div>
 
         <div class="composer">
-          <textarea id="chat-input" placeholder="Ask me about your store..."></textarea>
+          <textarea id="chat-input" placeholder="Ask me about your store..." rows="1"></textarea>
           <div class="composer-actions">
-            <button id="mute-btn" class="composer-btn">🔊</button>
-            <button id="send-btn" class="composer-btn primary">Send</button>
+            <button id="mute-btn" class="composer-btn" title="Mute/unmute">🔊</button>
+            <button id="send-btn" class="composer-btn primary" title="Send message">Send</button>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
 
-    <div class="panel-footer">
+    <footer class="panel-footer">
       <div class="status" id="status">Ready</div>
-    </div>
+    </footer>
   </div>
 
-  <!-- floating toggle -->
+  <!-- compact floating launcher -->
   <button id="mascot-toggle" class="mascot-toggle" aria-expanded="false" title="Open assistant">
-    <img id="toggle-avatar" src="default-mascot.png" alt="mascot" />
+    <img id="toggle-avatar" src="default-mascot.png" alt="toggle mascot" />
     <span class="toggle-text">Assistant</span>
   </button>
 
-  <!-- If your site already sets window.MASCOT_CONFIG, nothing changes.
-       Otherwise set it here for local testing: -->
+  <!-- Provide MASCOT_CONFIG for local testing if not set by host -->
   <script>
     if (!window.MASCOT_CONFIG) {
       window.MASCOT_CONFIG = {
         backend: "https://mascot.academictechnexus.com", // change to your backend host (no trailing slash)
-        upload: "https://mascot.academictechnexus.com/mascot/upload" // optional; backend endpoint
+        upload: "https://mascot.academictechnexus.com/mascot/upload"
       };
     }
   </script>
 
-  <!-- Load widget script (local) -->
   <script src="widget.js"></script>
 </body>
 </html>
