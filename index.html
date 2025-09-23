@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Shop Assistant — Mascot</title>
+  <title>Shop Assistant — Mascot (Improved)</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="widget.css" />
 </head>
 <body>
-  <!-- CHAT WRAPPER -->
   <div id="mascot-panel" class="mascot-panel closed" aria-hidden="true">
     <header class="panel-header">
       <div class="brand">
@@ -24,50 +23,50 @@
     </header>
 
     <main class="panel-body">
-      <!-- LEFT: avatar, actions -->
       <aside class="left">
         <div class="avatar-area">
-          <div id="avatar" class="avatar" aria-hidden="true">
-            <!-- default inline SVG mascot fallback -->
-            <svg id="avatar-svg" width="150" height="150" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="avatar-svg">
-              <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs>
-              <rect rx="18" width="120" height="120" fill="url(#g)"/>
-              <circle cx="40" cy="48" r="8" fill="#fff"/>
-              <circle cx="80" cy="48" r="8" fill="#fff"/>
-              <path d="M36 80c6 6 30 6 36 0" stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none"/>
-            </svg>
-            <img id="avatar-img" class="avatar-img hidden" alt="mascot" />
-            <div id="avatar-mouth" class="avatar-mouth"></div>
-          </div>
+          <!-- inline SVG fallback -->
+          <svg id="avatar-svg" class="avatar-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs>
+            <rect rx="18" width="120" height="120" fill="url(#g)"/>
+            <circle cx="40" cy="48" r="8" fill="#fff"/>
+            <circle cx="80" cy="48" r="8" fill="#fff"/>
+            <path d="M36 80c6 6 30 6 36 0" stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none"/>
+          </svg>
 
-          <!-- Floating mascot that pops out of the window -->
+          <!-- image avatar (hidden until uploaded/available) -->
+          <img id="avatar-img" class="avatar-img hidden" alt="mascot" />
+
+          <!-- model-viewer container (lazy loaded) -->
+          <div id="model-container" class="model-container hidden" aria-hidden="true"></div>
+
+          <!-- floating pop-out mascot element -->
           <div id="floating-mascot" class="floating-mascot hidden" aria-hidden="true">
             <img id="floating-img" src="" alt="mascot floating" />
+            <div id="floating-model" class="floating-model hidden" aria-hidden="true"></div>
           </div>
         </div>
 
-        <div class="chips">
-          <button class="chip" data-q="How do I connect my store?">Connect store</button>
-          <button class="chip" data-q="How much does it cost?">Pricing</button>
-          <button class="chip" data-q="Show me integrations">Integrations</button>
+        <div class="chips" role="list">
+          <button class="chip" data-q="How do I connect my store?" role="listitem">Connect store</button>
+          <button class="chip" data-q="How much does it cost?" role="listitem">Pricing</button>
+          <button class="chip" data-q="Show me integrations" role="listitem">Integrations</button>
         </div>
 
-        <label class="upload-label">
+        <label class="upload-label" title="Upload mascot">
           <input id="mascot-upload" type="file" accept="image/*" />
           <span class="upload-btn">Upload mascot</span>
         </label>
       </aside>
 
-      <!-- RIGHT: chat -->
       <section class="right">
         <div id="chat-body" class="chat-body" aria-live="polite"></div>
 
         <div class="composer">
-          <button id="emoji-btn" class="composer-mini" title="Quick">✨</button>
           <textarea id="chat-input" placeholder="Ask me about your store..." rows="1" aria-label="Message"></textarea>
           <div class="composer-actions">
             <button id="mute-btn" class="composer-mini" title="Mute/unmute">🔊</button>
-            <button id="send-btn" class="composer-send" title="Send message">Send</button>
+            <button id="send-btn" class="composer-send" title="Send message" aria-label="Send">Send</button>
           </div>
         </div>
       </section>
@@ -78,18 +77,18 @@
     </footer>
   </div>
 
-  <!-- Floating launcher button -->
   <button id="mascot-toggle" class="mascot-toggle" aria-expanded="false" title="Open assistant">
     <img id="toggle-avatar" class="toggle-avatar" src="" alt="assistant" />
     <span class="toggle-text">Assistant</span>
   </button>
 
-  <!-- provide config for local test if host hasn't set it -->
   <script>
+    // set backend for local testing if not provided by host page
     if (!window.MASCOT_CONFIG) {
       window.MASCOT_CONFIG = {
-        backend: "https://mascot.academictechnexus.com", // change to your backend host (no trailing slash)
-        upload: "https://mascot.academictechnexus.com/mascot/upload"
+        backend: "https://mascot.academictechnexus.com", // <-- change to your backend host (no trailing slash)
+        upload: "https://mascot.academictechnexus.com/mascot/upload",
+        placeholderGLB: "https://models.readyplayer.me/68b5e67fbac430a52ce1260e.glb"
       };
     }
   </script>
