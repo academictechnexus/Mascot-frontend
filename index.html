@@ -2,88 +2,87 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Shop Assistant — Right Panel</title>
+  <title>Shop Assistant — Mascot</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="widget.css" />
-  <!-- Lottie CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.9.6/lottie.min.js" defer></script>
-  <!-- Config -->
-  <script type="module" src="config.js" defer></script>
-  <!-- Widget -->
-  <script type="module" src="widget.js" defer></script>
 </head>
 <body>
-  <!-- RIGHT-SIDE PANEL WIDGET -->
-  <div id="mascot-panel" class="mascot-panel closed" aria-hidden="true" role="region" aria-label="Chat widget">
-    <div class="panel-handle" id="panel-handle" tabindex="0" role="button" aria-pressed="false">
+  <!-- Chatbot Mascot Widget -->
+  <div id="mascot-panel" class="mascot-panel closed" aria-hidden="true">
+    <div class="panel-header">
       <div class="brand">
-        <div class="logo" aria-hidden>SA</div>
+        <div class="logo">SA</div>
         <div class="meta">
           <div class="title">Shop Assistant</div>
-          <div class="subtitle">Custom Shopify apps & integrations</div>
+          <div class="subtitle">Your mascot-powered assistant</div>
         </div>
       </div>
-      <div class="toggle">
-        <button id="open-btn" aria-label="Open chat">💬</button>
+      <div class="controls">
+        <button id="minimize-btn" class="icon-btn" title="Minimize">—</button>
+        <button id="close-btn" class="icon-btn" title="Close">✕</button>
       </div>
     </div>
 
-    <div class="panel-body" id="panel-body">
-      <div class="header">
-        <div class="header-left">
-          <div id="mascot-lottie" class="mascot-lottie" aria-hidden></div>
+    <div class="panel-body">
+      <div class="left">
+        <div id="avatar-wrap" class="avatar-wrap">
+          <div id="avatar" class="avatar">
+            <img id="avatar-img" src="default-mascot.png" alt="mascot" />
+            <div id="avatar-mouth" class="avatar-mouth"></div>
+            <div id="avatar-spark" class="avatar-spark"></div>
+          </div>
         </div>
-        <div class="header-right">
-          <div class="h-title">Hi — I'm ShopBot</div>
-          <div class="h-sub">I can help with quotes, demos, or quick fixes.</div>
+
+        <div class="chips">
+          <button class="chip" data-q="How do I connect my store?">Connect store</button>
+          <button class="chip" data-q="How much does it cost?">Pricing</button>
+          <button class="chip" data-q="Show me integrations">Integrations</button>
+        </div>
+
+        <div class="upload-area">
+          <label class="upload-label">
+            <input id="mascot-upload" type="file" accept="image/*" />
+            <span id="upload-btn" class="upload-btn">Upload mascot</span>
+          </label>
         </div>
       </div>
 
-      <div class="chat" id="chat" role="log" aria-live="polite">
-        <!-- messages appear here -->
+      <div class="right">
+        <div id="chat-body" class="chat-body" aria-live="polite"></div>
+
+        <div class="composer">
+          <textarea id="chat-input" placeholder="Ask me about your store..."></textarea>
+          <div class="composer-actions">
+            <button id="mute-btn" class="composer-btn">🔊</button>
+            <button id="send-btn" class="composer-btn primary">Send</button>
+          </div>
+        </div>
       </div>
-
-      <div class="quick-buttons" id="quick-buttons" aria-hidden="false">
-        <!-- quick replies populated by script -->
-      </div>
-
-      <form id="chat-form" class="chat-form" aria-label="Send a message">
-        <button type="button" id="mic-btn" title="Voice input">🎙</button>
-        <input id="chat-input" type="text" placeholder="Ask about apps, pricing, demo..." autocomplete="off" />
-        <button id="send-btn" type="submit">Send</button>
-      </form>
-
-      <div class="bottom-actions">
-        <button id="book-demo" class="secondary">Book a demo</button>
-        <button id="get-quote" class="primary">Get a quote</button>
-      </div>
-
     </div>
-  </div>
 
-  <!-- Lead modal (hidden) -->
-  <div id="lead-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="lead-title">
-    <div class="modal-panel">
-      <h3 id="lead-title">Request a free quote</h3>
-      <p class="muted">Share a few details and we'll email a short estimate.</p>
-      <label>
-        Name
-        <input id="lead-name" type="text" />
-      </label>
-      <label>
-        Email
-        <input id="lead-email" type="email" />
-      </label>
-      <label>
-        Brief description (what do you want?)
-        <textarea id="lead-need"></textarea>
-      </label>
-      <div class="modal-actions">
-        <button id="lead-submit" class="primary">Send</button>
-        <button id="lead-cancel" class="secondary">Cancel</button>
-      </div>
+    <div class="panel-footer">
+      <div class="status" id="status">Ready</div>
     </div>
   </div>
 
+  <!-- floating toggle -->
+  <button id="mascot-toggle" class="mascot-toggle" aria-expanded="false" title="Open assistant">
+    <img id="toggle-avatar" src="default-mascot.png" alt="mascot" />
+    <span class="toggle-text">Assistant</span>
+  </button>
+
+  <!-- If your site already sets window.MASCOT_CONFIG, nothing changes.
+       Otherwise set it here for local testing: -->
+  <script>
+    if (!window.MASCOT_CONFIG) {
+      window.MASCOT_CONFIG = {
+        backend: "https://mascot.academictechnexus.com", // change to your backend host (no trailing slash)
+        upload: "https://mascot.academictechnexus.com/mascot/upload" // optional; backend endpoint
+      };
+    }
+  </script>
+
+  <!-- Load widget script (local) -->
+  <script src="widget.js"></script>
 </body>
 </html>
