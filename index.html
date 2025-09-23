@@ -7,11 +7,11 @@
   <link rel="stylesheet" href="widget.css" />
 </head>
 <body>
-  <!-- Chat UI -->
+  <!-- CHAT WRAPPER -->
   <div id="mascot-panel" class="mascot-panel closed" aria-hidden="true">
     <header class="panel-header">
       <div class="brand">
-        <div class="logo">SA</div>
+        <div class="logo" aria-hidden="true">SA</div>
         <div class="meta">
           <div class="title">Shop Assistant</div>
           <div class="subtitle">Mascot-powered support</div>
@@ -24,17 +24,25 @@
     </header>
 
     <main class="panel-body">
+      <!-- LEFT: avatar, actions -->
       <aside class="left">
-        <div id="avatar-wrap" class="avatar-wrap">
-          <div id="avatar" class="avatar">
-            <img id="avatar-img" src="default-mascot.png" alt="mascot" />
+        <div class="avatar-area">
+          <div id="avatar" class="avatar" aria-hidden="true">
+            <!-- default inline SVG mascot fallback -->
+            <svg id="avatar-svg" width="150" height="150" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="avatar-svg">
+              <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs>
+              <rect rx="18" width="120" height="120" fill="url(#g)"/>
+              <circle cx="40" cy="48" r="8" fill="#fff"/>
+              <circle cx="80" cy="48" r="8" fill="#fff"/>
+              <path d="M36 80c6 6 30 6 36 0" stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none"/>
+            </svg>
+            <img id="avatar-img" class="avatar-img hidden" alt="mascot" />
             <div id="avatar-mouth" class="avatar-mouth"></div>
-            <div id="avatar-spark" class="avatar-spark"></div>
           </div>
 
-          <!-- floating mascot element that will "pop out" -->
+          <!-- Floating mascot that pops out of the window -->
           <div id="floating-mascot" class="floating-mascot hidden" aria-hidden="true">
-            <img id="floating-img" src="default-mascot.png" alt="mascot floating" />
+            <img id="floating-img" src="" alt="mascot floating" />
           </div>
         </div>
 
@@ -44,22 +52,22 @@
           <button class="chip" data-q="Show me integrations">Integrations</button>
         </div>
 
-        <div class="upload-area">
-          <label class="upload-label">
-            <input id="mascot-upload" type="file" accept="image/*" />
-            <span id="upload-btn" class="upload-btn">Upload mascot</span>
-          </label>
-        </div>
+        <label class="upload-label">
+          <input id="mascot-upload" type="file" accept="image/*" />
+          <span class="upload-btn">Upload mascot</span>
+        </label>
       </aside>
 
+      <!-- RIGHT: chat -->
       <section class="right">
         <div id="chat-body" class="chat-body" aria-live="polite"></div>
 
         <div class="composer">
-          <textarea id="chat-input" placeholder="Ask me about your store..." rows="1"></textarea>
+          <button id="emoji-btn" class="composer-mini" title="Quick">✨</button>
+          <textarea id="chat-input" placeholder="Ask me about your store..." rows="1" aria-label="Message"></textarea>
           <div class="composer-actions">
-            <button id="mute-btn" class="composer-btn" title="Mute/unmute">🔊</button>
-            <button id="send-btn" class="composer-btn primary" title="Send message">Send</button>
+            <button id="mute-btn" class="composer-mini" title="Mute/unmute">🔊</button>
+            <button id="send-btn" class="composer-send" title="Send message">Send</button>
           </div>
         </div>
       </section>
@@ -70,13 +78,13 @@
     </footer>
   </div>
 
-  <!-- compact floating launcher -->
+  <!-- Floating launcher button -->
   <button id="mascot-toggle" class="mascot-toggle" aria-expanded="false" title="Open assistant">
-    <img id="toggle-avatar" src="default-mascot.png" alt="toggle mascot" />
+    <img id="toggle-avatar" class="toggle-avatar" src="" alt="assistant" />
     <span class="toggle-text">Assistant</span>
   </button>
 
-  <!-- Provide MASCOT_CONFIG for local testing if not set by host -->
+  <!-- provide config for local test if host hasn't set it -->
   <script>
     if (!window.MASCOT_CONFIG) {
       window.MASCOT_CONFIG = {
